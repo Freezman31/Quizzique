@@ -30,7 +30,7 @@ class QuizApp extends StatelessWidget {
       home: const Homepage(),
       routes: {
         '/code': (context) => CodePage(client: client),
-        '/play/quiz': (context) => Playpage(client: client),
+        '/play/quiz': (context) => PlayPage(client: client),
       },
     );
   }

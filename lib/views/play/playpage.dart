@@ -2,91 +2,67 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizapp/widgets/quiz_button.dart';
 
-class Playpage extends StatefulWidget {
+class PlayPage extends StatefulWidget {
   final Client client;
-  const Playpage({super.key, required this.client});
+  const PlayPage({super.key, required this.client});
 
   @override
-  State<Playpage> createState() => _PlaypageState();
+  State<PlayPage> createState() => _PlayPageState();
 }
 
-class _PlaypageState extends State<Playpage> {
+class _PlayPageState extends State<PlayPage> {
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
-    // Page with space for question and 4 buttons for answers
     return Scaffold(
-      appBar: AppBar(title: const Text('Play')),
-      body: Center(
+      body: Container(
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              flex: 3,
-              child: Container(
-                color: Colors.blueGrey,
-                child: const Text(
-                  'Question will be displayed here',
-                  style: TextStyle(fontSize: 24),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              flex: 2,
-              child: Column(
+              child: Row(
                 children: [
                   Expanded(
-                    flex: 10,
-                    child: Row(
-                      children: [
-                        Spacer(),
-                        Expanded(
-                          flex: 5,
-                          child: QuizButton(
-                            onPressed: () {},
-                            label: 'Answer 1',
-                            height: mq.size.height * 0.1,
-                          ),
-                        ),
-                        Spacer(),
-                        Expanded(
-                          flex: 5,
-                          child: QuizButton(
-                            onPressed: () {},
-                            label: 'Answer 2',
-                            height: mq.size.height * 0.1,
-                          ),
-                        ),
-                        Spacer(),
-                      ],
+                    child: QuizButton(
+                      onPressed: () {},
+                      label: '',
+                      height: mq.size.height * .5,
+                      symbol: Symbols.square,
                     ),
                   ),
-                  Spacer(),
+                  const SizedBox(width: 10),
                   Expanded(
-                    flex: 10,
-                    child: Row(
-                      children: [
-                        Spacer(),
-                        Expanded(
-                          flex: 5,
-                          child: QuizButton(
-                            onPressed: () {},
-                            label: 'Answer 3',
-                            height: mq.size.height * 0.1,
-                          ),
-                        ),
-                        Spacer(),
-                        Expanded(
-                          flex: 5,
-                          child: QuizButton(
-                            onPressed: () {},
-                            label: 'Answer 4',
-                            height: mq.size.height * 0.1,
-                          ),
-                        ),
-                        Spacer(),
-                      ],
+                    child: QuizButton(
+                      onPressed: () {},
+                      label: '',
+                      height: mq.size.height * .5,
+                      symbol: Symbols.circle,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: QuizButton(
+                      onPressed: () {},
+                      label: '',
+                      height: mq.size.height * .5,
+                      symbol: Symbols.triangle,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: QuizButton(
+                      onPressed: () {},
+                      label: '',
+                      height: mq.size.height * .5,
+                      symbol: Symbols.diamond,
                     ),
                   ),
                 ],
