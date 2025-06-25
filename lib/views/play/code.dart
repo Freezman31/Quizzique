@@ -40,7 +40,7 @@ class _CodePageState extends State<CodePage> {
                     Navigator.pushNamed(
                       context,
                       '/play/quiz',
-                      arguments: value,
+                      arguments: {'code': int.parse(value)},
                     );
                   }
                 }

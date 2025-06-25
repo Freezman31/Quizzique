@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:quizapp/views/homepage.dart';
 import 'package:quizapp/views/play/code.dart';
-import 'package:quizapp/views/play/playpage.dart';
+import 'package:quizapp/views/play/presentpage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,8 @@ class QuizApp extends StatelessWidget {
       home: const Homepage(),
       routes: {
         '/code': (context) => CodePage(client: client),
-        '/play/quiz': (context) => PlayPage(client: client),
+        //'/play/quiz': (context) => PlayPage(client: client),
+        '/play/quiz': (context) => PresentPage(client: client), // Replace with actual code logic
       },
     );
   }

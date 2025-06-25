@@ -22,13 +22,21 @@ class _PlayPageState extends State<PlayPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
+              child: Center(
+                child: Text(
+                  'Choose an answer !',
+                  style: Theme.of(context).textTheme.headlineLarge,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
               child: Row(
                 children: [
                   Expanded(
                     child: QuizButton(
                       onPressed: () {},
                       label: '',
-                      height: mq.size.height * .5,
                       symbol: Symbols.square,
                     ),
                   ),
@@ -37,7 +45,6 @@ class _PlayPageState extends State<PlayPage> {
                     child: QuizButton(
                       onPressed: () {},
                       label: '',
-                      height: mq.size.height * .5,
                       symbol: Symbols.circle,
                     ),
                   ),
@@ -46,13 +53,13 @@ class _PlayPageState extends State<PlayPage> {
             ),
             const SizedBox(height: 10),
             Expanded(
+              flex: 3,
               child: Row(
                 children: [
                   Expanded(
                     child: QuizButton(
                       onPressed: () {},
                       label: '',
-                      height: mq.size.height * .5,
                       symbol: Symbols.triangle,
                     ),
                   ),
@@ -61,7 +68,6 @@ class _PlayPageState extends State<PlayPage> {
                     child: QuizButton(
                       onPressed: () {},
                       label: '',
-                      height: mq.size.height * .5,
                       symbol: Symbols.diamond,
                     ),
                   ),

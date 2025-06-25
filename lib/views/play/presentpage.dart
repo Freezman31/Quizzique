@@ -1,5 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:quizapp/logic/logic.dart';
 import 'package:quizapp/widgets/quiz_button.dart';
 
 class PresentPage extends StatefulWidget {
@@ -11,9 +12,45 @@ class PresentPage extends StatefulWidget {
 }
 
 class _PresentPageState extends State<PresentPage> {
+  Question q = Question.empty();
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
+    final arguments =
+        (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{})
+            as Map;
+    if (q == Question.empty()) {
+      getCurrentQuestion(
+        client: widget.client,
+        code: arguments['code'] ?? 0,
+      ).then((v) {
+        setState(() {
+          print('Question: ${v.question}');
+          print('Answers: ${v.answers}');
+          q = v;
+        });
+      });
+    }
+    // Realtime realtime = Realtime(widget.client);
+    // realtime
+    //     .subscribe([
+    //       'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${q.id}',
+    //     ])
+    //     .stream
+    //     .listen((event) {
+    //       if (event.events.contains(
+    //         'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.*',
+    //       )) {
+    //         getCurrentQuestion(
+    //           client: widget.client,
+    //           code: arguments['code'] ?? 0,
+    //         ).then((v) {
+    //           setState(() {
+    //             q = v;
+    //           });
+    //         });
+    //       }
+    //     });
     // Page with space for question and 4 buttons for answers
     return Scaffold(
       appBar: AppBar(title: const Text('Play')),
@@ -22,13 +59,10 @@ class _PresentPageState extends State<PresentPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
-              flex: 3,
-              child: Container(
-                color: Colors.blueGrey,
-                child: const Text(
-                  'Question will be displayed here',
-                  style: TextStyle(fontSize: 24),
-                ),
+              flex: 2,
+              child: Text(
+                q.question,
+                style: Theme.of(context).textTheme.headlineLarge,
               ),
             ),
             const SizedBox(height: 20),
@@ -42,22 +76,19 @@ class _PresentPageState extends State<PresentPage> {
                       children: [
                         Spacer(),
                         Expanded(
-                          flex: 7,
+                          flex: 10,
                           child: QuizButton(
                             onPressed: () {},
-                            label: 'Answer 1',
-                            height: mq.size.height * 0.14,
+                            label: q.answers[0],
                             symbol: Symbols.square,
                           ),
                         ),
-                        Spacer(),
+                        const SizedBox(width: 10),
                         Expanded(
-                          flex: 7,
+                          flex: 10,
                           child: QuizButton(
                             onPressed: () {},
-                            label:
-                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                            height: mq.size.height * 0.14,
+                            label: q.answers[1],
                             symbol: Symbols.circle,
                           ),
                         ),
@@ -65,28 +96,26 @@ class _PresentPageState extends State<PresentPage> {
                       ],
                     ),
                   ),
-                  Spacer(),
+                  const SizedBox(height: 10),
                   Expanded(
                     flex: 10,
                     child: Row(
                       children: [
                         Spacer(),
                         Expanded(
-                          flex: 7,
+                          flex: 10,
                           child: QuizButton(
                             onPressed: () {},
-                            label: 'Answer 3',
-                            height: mq.size.height * 0.14,
+                            label: q.answers[2],
                             symbol: Symbols.triangle,
                           ),
                         ),
-                        Spacer(),
+                        const SizedBox(width: 10),
                         Expanded(
-                          flex: 7,
+                          flex: 10,
                           child: QuizButton(
                             onPressed: () {},
-                            label: 'Answer 4',
-                            height: mq.size.height * 0.14,
+                            label: q.answers[3],
                             symbol: Symbols.diamond,
                           ),
                         ),
@@ -97,6 +126,7 @@ class _PresentPageState extends State<PresentPage> {
                 ],
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

@@ -5,13 +5,11 @@ import 'package:flutter/material.dart';
 class QuizButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String label;
-  final double height;
   final Symbols symbol; // Default symbol, can be changed
   const QuizButton({
     super.key,
     required this.onPressed,
     required this.label,
-    required this.height,
     required this.symbol,
   });
 
@@ -20,21 +18,36 @@ class QuizButton extends StatelessWidget {
     return MaterialButton(
       onPressed: onPressed,
       color: getSymbolColor(symbol),
-      height: height,
+      height: double.infinity,
       child: Row(
         children: [
-          Expanded(
+          Container(
+            padding: EdgeInsets.all(5),
             child: Icon(
               getSymbolIcon(symbol),
               color: Colors.white,
               size: min(
-                MediaQuery.of(context).size.height * 0.3,
-                MediaQuery.of(context).size.width * 0.3,
+                label == ''
+                    ? MediaQuery.of(context).size.height * 0.2
+                    : MediaQuery.of(context).size.height * 0.2,
+                min(
+                  label == ''
+                      ? MediaQuery.of(context).size.width * 0.2
+                      : MediaQuery.of(context).size.width * 0.2,
+                  75,
+                ),
               ),
             ),
           ),
           label != '' ? SizedBox(width: 10) : const SizedBox.shrink(),
-          label != '' ? Expanded(child: Text(label)) : const SizedBox.shrink(),
+          label != ''
+              ? Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                )
+              : const SizedBox.shrink(),
         ],
       ),
     );
