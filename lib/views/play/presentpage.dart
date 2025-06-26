@@ -19,38 +19,37 @@ class _PresentPageState extends State<PresentPage> {
     final arguments =
         (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{})
             as Map;
+    Realtime realtime = Realtime(widget.client);
     if (q == Question.empty()) {
       getCurrentQuestion(
         client: widget.client,
         code: arguments['code'] ?? 0,
       ).then((v) {
+        realtime
+            .subscribe([
+              'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.id}',
+            ])
+            .stream
+            .listen((event) {
+              if (event.events.contains(
+                'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.*',
+              )) {
+                getCurrentQuestion(
+                  client: widget.client,
+                  code: arguments['code'] ?? 0,
+                ).then((v) {
+                  setState(() {
+                    print('Updated Question: ${v.question}');
+                    q = v;
+                  });
+                });
+              }
+            });
         setState(() {
-          print('Question: ${v.question}');
-          print('Answers: ${v.answers}');
           q = v;
         });
       });
     }
-    // Realtime realtime = Realtime(widget.client);
-    // realtime
-    //     .subscribe([
-    //       'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${q.id}',
-    //     ])
-    //     .stream
-    //     .listen((event) {
-    //       if (event.events.contains(
-    //         'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.*',
-    //       )) {
-    //         getCurrentQuestion(
-    //           client: widget.client,
-    //           code: arguments['code'] ?? 0,
-    //         ).then((v) {
-    //           setState(() {
-    //             q = v;
-    //           });
-    //         });
-    //       }
-    //     });
     // Page with space for question and 4 buttons for answers
     return Scaffold(
       appBar: AppBar(title: const Text('Play')),

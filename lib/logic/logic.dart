@@ -47,7 +47,7 @@ Future<Question> getCurrentQuestion({
         }
         Document document = documents.documents.first;
         return Question(
-          id: document.data['currentQuestionID'].toString(),
+          id: document.$id,
           question:
               jsonDecode(document.data['currentQuestion'])['question']
                   as String,
