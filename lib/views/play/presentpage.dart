@@ -27,7 +27,7 @@ class _PresentPageState extends State<PresentPage> {
       ).then((v) {
         realtime
             .subscribe([
-              'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.id}',
+              'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
             ])
             .stream
             .listen((event) {

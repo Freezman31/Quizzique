@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 Future<bool> isCodeValid(String code, {required Client client}) async {
   if (code.length != 6) {
@@ -47,7 +48,9 @@ Future<Question> getCurrentQuestion({
         }
         Document document = documents.documents.first;
         return Question(
-          id: document.$id,
+          gameID: document.$id,
+          questionID:
+              jsonDecode(document.data['currentQuestion'])['id'] as String,
           question:
               jsonDecode(document.data['currentQuestion'])['question']
                   as String,
@@ -65,21 +68,24 @@ Future<Question> getCurrentQuestion({
 }
 
 class Question {
-  final String id;
+  final String gameID;
+  final String questionID;
   final String question;
   final List<String> answers;
   final int? correctAnswerIndex;
 
   Question({
-    required this.id,
+    required this.gameID,
     required this.question,
     required this.answers,
     this.correctAnswerIndex,
+    required this.questionID,
   });
   Question.empty()
-    : id = '',
+    : gameID = '',
       question = '',
       answers = ['', '', '', ''],
+      questionID = '',
       correctAnswerIndex = null;
 
   @override
@@ -87,7 +93,7 @@ class Question {
     if (identical(this, other)) return true;
     if (other.runtimeType != runtimeType) return false;
     final Question otherQuestion = other as Question;
-    return id == otherQuestion.id &&
+    return gameID == otherQuestion.gameID &&
         question == otherQuestion.question &&
         listEquals(answers, otherQuestion.answers) &&
         correctAnswerIndex == otherQuestion.correctAnswerIndex;
@@ -95,9 +101,36 @@ class Question {
 
   @override
   int get hashCode {
-    return id.hashCode ^
+    return gameID.hashCode ^
         question.hashCode ^
         answers.hashCode ^
         (correctAnswerIndex?.hashCode ?? 0);
   }
+
+  Future<void> answer({
+    required Client client,
+    required int answerIndex,
+  }) async {
+    if (answerIndex < 0 || answerIndex >= answers.length) {
+      throw Exception('Invalid answer index');
+    }
+    Databases databases = Databases(client);
+    await databases.createDocument(
+      databaseId: '6859582600031c46e49c',
+      collectionId: '685d148300346d2203a7',
+      documentId: ID.unique(),
+      data: {
+        'questionId': questionID,
+        'answerIndex': answerIndex,
+        'playerId': await _getDeviceID(),
+        'games': gameID,
+      },
+    );
+  }
+}
+
+final String? deviceId = null;
+
+Future<String> _getDeviceID() async {
+  return deviceId ?? (await const FlutterSecureStorage().read(key: 'id') ?? '');
 }

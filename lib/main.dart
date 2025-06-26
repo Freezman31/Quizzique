@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:appwrite/appwrite.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:quizapp/views/homepage.dart';
 import 'package:quizapp/views/play/code.dart';
 import 'package:quizapp/views/play/presentpage.dart';
@@ -12,6 +16,18 @@ void main() async {
     ..setEndpoint('https://cloud.appwrite.io/v1') // Your Appwrite endpoint
     ..setProject(dotenv.get('PROJECT_ID')); // Your Appwrite project ID
   await client.ping(); // Optional: Check if the client is connected
+  if (!(await FlutterSecureStorage().containsKey(key: 'id'))) {
+    String deviceID = sha256
+        .convert(
+          utf8.encode(
+            (DateTime.now().microsecondsSinceEpoch *
+                    dotenv.getInt('ID_MULTIPLIER', fallback: 1))
+                .toString(),
+          ),
+        )
+        .toString();
+    await FlutterSecureStorage().write(key: 'id', value: deviceID);
+  }
   runApp(QuizApp(client: client));
 }
 
@@ -31,7 +47,8 @@ class QuizApp extends StatelessWidget {
       routes: {
         '/code': (context) => CodePage(client: client),
         //'/play/quiz': (context) => PlayPage(client: client),
-        '/play/quiz': (context) => PresentPage(client: client), // Replace with actual code logic
+        '/play/quiz': (context) =>
+            PresentPage(client: client), // Replace with actual code logic
       },
     );
   }

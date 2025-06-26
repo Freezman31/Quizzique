@@ -13,7 +13,6 @@ class PlayPage extends StatefulWidget {
 class _PlayPageState extends State<PlayPage> {
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.of(context);
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.all(20),
