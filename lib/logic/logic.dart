@@ -92,4 +92,12 @@ class Question {
         listEquals(answers, otherQuestion.answers) &&
         correctAnswerIndex == otherQuestion.correctAnswerIndex;
   }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        question.hashCode ^
+        answers.hashCode ^
+        (correctAnswerIndex?.hashCode ?? 0);
+  }
 }
