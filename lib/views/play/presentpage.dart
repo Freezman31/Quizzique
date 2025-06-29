@@ -15,7 +15,6 @@ class _PresentPageState extends State<PresentPage> {
   Question q = Question.empty();
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.of(context);
     final arguments =
         (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{})
             as Map;
@@ -39,7 +38,6 @@ class _PresentPageState extends State<PresentPage> {
                   code: arguments['code'] ?? 0,
                 ).then((v) {
                   setState(() {
-                    print('Updated Question: ${v.question}');
                     q = v;
                   });
                 });

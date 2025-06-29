@@ -49,8 +49,9 @@ Future<Question> getCurrentQuestion({
         Document document = documents.documents.first;
         return Question(
           gameID: document.$id,
-          questionID:
-              jsonDecode(document.data['currentQuestion'])['id'] as String,
+          questionID: jsonDecode(
+            document.data['currentQuestion'],
+          )['id'].toString(),
           question:
               jsonDecode(document.data['currentQuestion'])['question']
                   as String,
@@ -107,7 +108,7 @@ class Question {
         (correctAnswerIndex?.hashCode ?? 0);
   }
 
-  Future<void> answer({
+  Future<bool> answer({
     required Client client,
     required int answerIndex,
   }) async {
@@ -115,17 +116,43 @@ class Question {
       throw Exception('Invalid answer index');
     }
     Databases databases = Databases(client);
+    print('Answering question with ID: $questionID');
+    print('Answer index: $answerIndex');
+    final id = ID.unique();
     await databases.createDocument(
       databaseId: '6859582600031c46e49c',
       collectionId: '685d148300346d2203a7',
-      documentId: ID.unique(),
+      documentId: id,
+      permissions: [Permission.read(Role.any())],
       data: {
-        'questionId': questionID,
-        'answerIndex': answerIndex,
-        'playerId': await _getDeviceID(),
+        'questionID': int.parse(questionID),
+        'answer': answerIndex,
+        'playerID': await _getDeviceID(),
         'games': gameID,
       },
     );
+    Realtime realtime = Realtime(client);
+    bool? ret;
+    realtime
+        .subscribe([
+          'databases.6859582600031c46e49c.collections.685d148300346d2203a7.documents.*',
+          'databases.*.collections.*.documents.*',
+        ])
+        .stream
+        .listen((event) async {
+          print('Realtime event received: ${event.events}');
+          final newDoc = await databases.getDocument(
+            databaseId: '6859582600031c46e49c',
+            collectionId: '685d148300346d2203a7',
+            documentId: id,
+          );
+          ret = newDoc.data['correct'] as bool;
+        });
+    print('Subscribed to realtime updates for answers');
+    // while (ret == null) {
+    //   //await Future.delayed(Duration(milliseconds: 100));
+    // }
+    return ret ?? false;
   }
 }
 
