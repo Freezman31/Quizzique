@@ -4,6 +4,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:logger/logger.dart';
 
 Future<bool> isCodeValid(String code, {required Client client}) async {
   if (code.length != 6) {
@@ -23,7 +24,7 @@ Future<bool> isCodeValid(String code, {required Client client}) async {
     );
     return result.total > 0;
   } catch (e) {
-    print('Error fetching documents: $e');
+    Logger().e('Error checking code validity: $e');
     return false;
   }
 }
@@ -108,7 +109,7 @@ class Question {
         (correctAnswerIndex?.hashCode ?? 0);
   }
 
-  Future<bool> answer({
+  Future<AnswerStatus> answer({
     required Client client,
     required int answerIndex,
   }) async {
@@ -116,14 +117,12 @@ class Question {
       throw Exception('Invalid answer index');
     }
     Databases databases = Databases(client);
-    print('Answering question with ID: $questionID');
-    print('Answer index: $answerIndex');
+    Logger().i('Answering question $questionID with answer index $answerIndex');
     final id = ID.unique();
-    await databases.createDocument(
+    final doc = await databases.createDocument(
       databaseId: '6859582600031c46e49c',
       collectionId: '685d148300346d2203a7',
       documentId: id,
-      permissions: [Permission.read(Role.any())],
       data: {
         'questionID': int.parse(questionID),
         'answer': answerIndex,
@@ -131,28 +130,36 @@ class Question {
         'games': gameID,
       },
     );
-    Realtime realtime = Realtime(client);
-    bool? ret;
-    realtime
-        .subscribe([
-          'databases.6859582600031c46e49c.collections.685d148300346d2203a7.documents.*',
-          'databases.*.collections.*.documents.*',
-        ])
-        .stream
-        .listen((event) async {
-          print('Realtime event received: ${event.events}');
-          final newDoc = await databases.getDocument(
-            databaseId: '6859582600031c46e49c',
-            collectionId: '685d148300346d2203a7',
-            documentId: id,
-          );
-          ret = newDoc.data['correct'] as bool;
-        });
-    print('Subscribed to realtime updates for answers');
-    // while (ret == null) {
-    //   //await Future.delayed(Duration(milliseconds: 100));
-    // }
-    return ret ?? false;
+    Functions func = Functions(client);
+    final res = await func.createExecution(
+      functionId: '685d5b460009ba42e17f',
+      body: jsonEncode({
+        'questionID': questionID,
+        'answerIndex': answerIndex,
+        'games': (await databases.getDocument(
+          databaseId: '6859582600031c46e49c',
+          collectionId: '685990a30018382797dc',
+          documentId: gameID,
+        )).data,
+        'playerID': await _getDeviceID(),
+        '\$id': id,
+      }),
+    );
+    if (res.responseStatusCode != 200) {
+      if (res.responseStatusCode == 400) {
+        return AnswerStatus.alreadyAnswered;
+      } else {
+        databases.deleteDocument(
+          databaseId: doc.$databaseId,
+          collectionId: doc.$collectionId,
+          documentId: doc.$id,
+        );
+        throw Exception('Failed to execute function: ${res.responseBody}');
+      }
+    }
+    return jsonDecode(res.responseBody)['data']['correct'] as bool
+        ? AnswerStatus.correct
+        : AnswerStatus.incorrect;
   }
 }
 
@@ -161,3 +168,5 @@ final String? deviceId = null;
 Future<String> _getDeviceID() async {
   return deviceId ?? (await const FlutterSecureStorage().read(key: 'id') ?? '');
 }
+
+enum AnswerStatus { correct, incorrect, alreadyAnswered }

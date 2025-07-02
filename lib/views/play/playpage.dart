@@ -13,30 +13,35 @@ class PlayPage extends StatefulWidget {
 
 class _PlayPageState extends State<PlayPage> {
   Question q = Question.empty();
+  Realtime? realtime;
   @override
   Widget build(BuildContext context) {
     final arguments =
         (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{})
             as Map;
-    Realtime realtime = Realtime(widget.client);
+    realtime ??= Realtime(widget.client);
     if (q == Question.empty()) {
       getCurrentQuestion(
         client: widget.client,
         code: arguments['code'] ?? 0,
       ).then((v) {
-        realtime
+        realtime!
             .subscribe([
               'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
             ])
             .stream
             .listen((event) {
               if (event.events.contains(
-                'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.*',
+                'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
               )) {
+                if (!ModalRoute.of(context)!.isCurrent) {
+                  Navigator.pop(context);
+                }
                 getCurrentQuestion(
                   client: widget.client,
                   code: arguments['code'] ?? 0,
                 ).then((v) {
+                  wait();
                   setState(() {
                     q = v;
                   });
@@ -44,10 +49,12 @@ class _PlayPageState extends State<PlayPage> {
               }
             });
         setState(() {
+          wait();
           q = v;
         });
       });
     }
+
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.all(20),
@@ -127,28 +134,69 @@ class _PlayPageState extends State<PlayPage> {
       ),
     );
   }
+
+  void wait() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final MediaQueryData mq = MediaQuery.of(context);
+        return AlertDialog(
+          content: SizedBox(
+            width: mq.size.width * 0.8,
+            height: mq.size.height * 0.4,
+            child: Column(
+              children: [
+                SizedBox(height: 10),
+                Text(
+                  'Look at the question and choose an answer!',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                SizedBox(height: 10),
+                Center(
+                  child: SizedBox(
+                    width: mq.size.height * 0.2,
+                    height: mq.size.height * 0.2,
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+      barrierDismissible: false,
+    );
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!ModalRoute.of(context)!.isCurrent) {
+        Navigator.pop(context);
+      }
+    });
+  }
 }
 
-void result({required BuildContext context, required bool correct}) {
+void result({required BuildContext context, required AnswerStatus correct}) {
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: Text(correct ? 'You Win!' : 'You Lose!'),
-        content: Text(
-          correct
-              ? 'Congratulations! You answered correctly.'
-              : 'Sorry, that was incorrect.',
+        title: Text(
+          correct == AnswerStatus.correct
+              ? 'You Win!'
+              : correct == AnswerStatus.incorrect
+              ? 'You Lose!'
+              : 'Already Answered',
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('OK'),
-          ),
-        ],
+        content: Text(
+          correct == AnswerStatus.correct
+              ? 'Congratulations! You answered correctly.'
+              : correct == AnswerStatus.incorrect
+              ? 'Sorry, that was incorrect.'
+              : 'You have already answered this question.',
+        ),
       );
     },
+    barrierDismissible: false,
   );
 }

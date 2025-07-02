@@ -16,6 +16,12 @@ void main() async {
     ..setEndpoint('https://cloud.appwrite.io/v1') // Your Appwrite endpoint
     ..setProject(dotenv.get('PROJECT_ID')); // Your Appwrite project ID
   await client.ping(); // Optional: Check if the client is connected
+  final acc = Account(client);
+  try {
+    await acc.get();
+  } catch (e) {
+    await acc.createAnonymousSession();
+  }
   if (!(await FlutterSecureStorage().containsKey(key: 'id'))) {
     String deviceID = sha256
         .convert(
