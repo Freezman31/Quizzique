@@ -157,7 +157,6 @@ class Question {
           collectionId: doc.$collectionId,
           documentId: doc.$id,
         );
-        throw Exception('Failed to execute function: ${res.responseBody}');
       }
     }
     final payload = jsonDecode(res.responseBody)['data'];
