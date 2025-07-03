@@ -79,7 +79,7 @@ class _PlayPageState extends State<PlayPage> {
                       onPressed: () async {
                         result(
                           context: context,
-                          correct: await q.answer(
+                          response: await q.answer(
                             client: widget.client,
                             answerIndex: 1,
                           ),
@@ -176,23 +176,27 @@ class _PlayPageState extends State<PlayPage> {
   }
 }
 
-void result({required BuildContext context, required AnswerStatus correct}) {
+void result({required BuildContext context, required AnswerResponse response}) {
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
         title: Text(
-          correct == AnswerStatus.correct
+          response.status == AnswerStatus.correct
               ? 'You Win!'
-              : correct == AnswerStatus.incorrect
+              : response.status == AnswerStatus.incorrect
               ? 'You Lose!'
+              : response.status == AnswerStatus.tooLate
+              ? 'Too Late!'
               : 'Already Answered',
         ),
         content: Text(
-          correct == AnswerStatus.correct
-              ? 'Congratulations! You answered correctly.'
-              : correct == AnswerStatus.incorrect
+          response.status == AnswerStatus.correct
+              ? 'Congratulations! You answered correctly. You won ${response.score} points!'
+              : response.status == AnswerStatus.incorrect
               ? 'Sorry, that was incorrect.'
+              : response.status == AnswerStatus.tooLate
+              ? 'Sorry, you took too long to answer.'
               : 'You have already answered this question.',
         ),
       );

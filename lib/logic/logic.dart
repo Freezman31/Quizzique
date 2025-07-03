@@ -109,7 +109,7 @@ class Question {
         (correctAnswerIndex?.hashCode ?? 0);
   }
 
-  Future<AnswerStatus> answer({
+  Future<AnswerResponse> answer({
     required Client client,
     required int answerIndex,
   }) async {
@@ -143,11 +143,14 @@ class Question {
         )).data,
         'playerID': await _getDeviceID(),
         '\$id': id,
+        '\$updatedAt': doc.$updatedAt,
       }),
     );
     if (res.responseStatusCode != 200) {
       if (res.responseStatusCode == 400) {
-        return AnswerStatus.alreadyAnswered;
+        return AnswerResponse(score: 0, status: AnswerStatus.alreadyAnswered);
+      } else if (res.responseStatusCode == 408) {
+        return AnswerResponse(score: 0, status: AnswerStatus.tooLate);
       } else {
         databases.deleteDocument(
           databaseId: doc.$databaseId,
@@ -157,9 +160,13 @@ class Question {
         throw Exception('Failed to execute function: ${res.responseBody}');
       }
     }
-    return jsonDecode(res.responseBody)['data']['correct'] as bool
-        ? AnswerStatus.correct
-        : AnswerStatus.incorrect;
+    final payload = jsonDecode(res.responseBody)['data'];
+    return payload['correct'] as bool
+        ? AnswerResponse(
+            score: payload['score'] as int,
+            status: AnswerStatus.correct,
+          )
+        : AnswerResponse(score: 0, status: AnswerStatus.incorrect);
   }
 }
 
@@ -169,4 +176,11 @@ Future<String> _getDeviceID() async {
   return deviceId ?? (await const FlutterSecureStorage().read(key: 'id') ?? '');
 }
 
-enum AnswerStatus { correct, incorrect, alreadyAnswered }
+class AnswerResponse {
+  final int score;
+  final AnswerStatus status;
+
+  AnswerResponse({required this.score, required this.status});
+}
+
+enum AnswerStatus { correct, incorrect, alreadyAnswered, tooLate }
