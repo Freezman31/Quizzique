@@ -48,6 +48,9 @@ Future<Question> getCurrentQuestion({
           throw Exception('Multiple documents found for the given code.');
         }
         Document document = documents.documents.first;
+        Logger().i(
+          'Current question ID: ${jsonDecode(document.data['currentQuestion'])['id'].toString()}',
+        );
         return Question(
           gameID: document.$id,
           questionID: jsonDecode(
@@ -169,6 +172,32 @@ class Question {
   }
 }
 
+Future<List<Score>> getPodium({
+  required Client client,
+  required String gameID,
+}) async {
+  Databases databases = Databases(client);
+  final game = await databases.getDocument(
+    databaseId: '6859582600031c46e49c',
+    collectionId: '685990a30018382797dc',
+    documentId: gameID,
+  );
+  print('Game ID: $gameID');
+  print('Game data: ${game.data}');
+  print('Scores: ${game.data['scores']}');
+  final payload = jsonDecode(game.data['scores']);
+  final List<Score> podium = (payload as Map<String, dynamic>).entries
+      .map(
+        (entry) => Score(
+          playerID: entry.key,
+          score: entry.value['s'],
+          playerName: entry.value['name'] ?? entry.key,
+        ),
+      )
+      .toList();
+  return podium..sort((a, b) => b.score.compareTo(a.score));
+}
+
 final String? deviceId = null;
 
 Future<String> _getDeviceID() async {
@@ -180,6 +209,18 @@ class AnswerResponse {
   final AnswerStatus status;
 
   AnswerResponse({required this.score, required this.status});
+}
+
+class Score {
+  final String playerID;
+  final int score;
+  final String playerName;
+
+  Score({
+    required this.playerID,
+    required this.score,
+    required this.playerName,
+  });
 }
 
 enum AnswerStatus { correct, incorrect, alreadyAnswered, tooLate }

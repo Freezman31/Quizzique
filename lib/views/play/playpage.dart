@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:quizapp/logic/logic.dart';
 import 'package:quizapp/widgets/quiz_button.dart';
 
@@ -25,6 +28,8 @@ class _PlayPageState extends State<PlayPage> {
         client: widget.client,
         code: arguments['code'] ?? 0,
       ).then((v) {
+        Logger().i('Subscribing to question updates for game ID: ${v.gameID}');
+
         realtime!
             .subscribe([
               'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
@@ -32,8 +37,14 @@ class _PlayPageState extends State<PlayPage> {
             .stream
             .listen((event) {
               if (event.events.contains(
-                'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
-              )) {
+                    'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
+                  ) &&
+                  jsonDecode(event.payload['currentQuestion'])['id'] !=
+                      int.parse(q.questionID)) {
+                Logger().i(
+                  'New question received: ${jsonDecode(event.payload['currentQuestion'])['id']},',
+                );
+                Logger().i('Current question ID: ${q.questionID}');
                 if (!ModalRoute.of(context)!.isCurrent) {
                   Navigator.pop(context);
                 }

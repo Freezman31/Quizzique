@@ -44,7 +44,16 @@ class Homepage extends StatelessWidget {
             width: mq.size.width * 0.95,
             height: mq.size.height * 0.1,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  '/play/present',
+                  arguments: {
+                    'code':
+                        123456, // Placeholder for code, replace with actual logic
+                  },
+                );
+              },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),

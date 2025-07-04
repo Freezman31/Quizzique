@@ -18,31 +18,31 @@ class _PresentPageState extends State<PresentPage> {
     final arguments =
         (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{})
             as Map;
-    Realtime realtime = Realtime(widget.client);
+    // Realtime realtime = Realtime(widget.client);
     if (q == Question.empty()) {
       getCurrentQuestion(
         client: widget.client,
         code: arguments['code'] ?? 0,
       ).then((v) {
-        realtime
-            .subscribe([
-              'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
-            ])
-            .stream
-            .listen((event) {
-              if (event.events.contains(
-                'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.*',
-              )) {
-                getCurrentQuestion(
-                  client: widget.client,
-                  code: arguments['code'] ?? 0,
-                ).then((v) {
-                  setState(() {
-                    q = v;
-                  });
-                });
-              }
-            });
+        // realtime
+        //     .subscribe([
+        //       'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
+        //     ])
+        //     .stream
+        //     .listen((event) {
+        //       if (event.events.contains(
+        //         'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.*',
+        //       )) {
+        //         getCurrentQuestion(
+        //           client: widget.client,
+        //           code: arguments['code'] ?? 0,
+        //         ).then((v) {
+        //           setState(() {
+        //             q = v;
+        //           });
+        //         });
+        //       }
+        //     });
         setState(() {
           q = v;
         });
@@ -126,6 +126,18 @@ class _PresentPageState extends State<PresentPage> {
             const SizedBox(height: 20),
           ],
         ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            '/play/podium',
+            arguments: {'gameID': q.gameID},
+          );
+        },
+        tooltip: 'Next',
+        child: const Icon(Icons.arrow_forward),
       ),
     );
   }
