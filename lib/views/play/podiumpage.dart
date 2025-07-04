@@ -28,6 +28,7 @@ class _PodiumPageState extends State<PodiumPage> {
         });
       });
     }
+    final MediaQueryData mq = MediaQuery.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Play'),
@@ -49,14 +50,35 @@ class _PodiumPageState extends State<PodiumPage> {
                 return ScoreView(score: score, rank: index + 1);
               })
             else
-              const Text('No scores available', style: TextStyle(fontSize: 18)),
+              SizedBox(
+                height: mq.size.height * 0.5,
+                width: mq.size.width * 0.8,
+                child: Column(
+                  children: [
+                    const Text('Loading...', style: TextStyle(fontSize: 18)),
+                    const CircularProgressIndicator(),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Handle button press
+          goToNextQuestion(
+            client: widget.client,
+            gameID: arguments['gameID'],
+            currentQuestion: arguments['currentQuestion'],
+          ).then(
+            (_) => Navigator.of(context).popAndPushNamed(
+              '/play/present',
+              arguments: {
+                'code': arguments['code'],
+                'gameID': arguments['gameID'],
+              },
+            ),
+          );
         },
         tooltip: 'Next Question',
         child: const Icon(Icons.arrow_forward),

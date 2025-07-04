@@ -48,28 +48,59 @@ Future<Question> getCurrentQuestion({
           throw Exception('Multiple documents found for the given code.');
         }
         Document document = documents.documents.first;
-        Logger().i(
-          'Current question ID: ${jsonDecode(document.data['currentQuestion'])['id'].toString()}',
-        );
+
+        final payload = jsonDecode(document.data['currentQuestion']);
+        Logger().i('Current question ID: ${payload['id'].toString()}');
         return Question(
           gameID: document.$id,
-          questionID: jsonDecode(
-            document.data['currentQuestion'],
-          )['id'].toString(),
-          question:
-              jsonDecode(document.data['currentQuestion'])['question']
-                  as String,
-          answers: List<String>.from(
-            jsonDecode(document.data['currentQuestion'])['answers'] as List,
-          ),
-          correctAnswerIndex:
-              jsonDecode(document.data['currentQuestion'])['correctAnswerIndex']
-                  as int?,
+          questionID: payload['id'].toString(),
+          questionIndex: payload['i'] as int,
+          question: payload['question'] as String,
+          answers: List<String>.from(payload['answers'] as List),
+          correctAnswerIndex: payload['correctAnswerIndex'] as int?,
+          duration: payload['d'] as int,
         );
       })
       .catchError((error) {
         throw error;
       });
+}
+
+Future<void> goToNextQuestion({
+  required Client client,
+  required String gameID,
+  required Question currentQuestion,
+}) async {
+  Databases databases = Databases(client);
+
+  final game = await databases.getDocument(
+    databaseId: '6859582600031c46e49c',
+    collectionId: '685990a30018382797dc',
+    documentId: gameID,
+  );
+  final nextQuestion = jsonDecode(
+    game.data['quiz']['questions'][currentQuestion.questionIndex + 1],
+  );
+
+  await databases.updateDocument(
+    databaseId: '6859582600031c46e49c',
+    collectionId: '685990a30018382797dc',
+    documentId: gameID,
+    data: {
+      'currentQuestion': jsonEncode({
+        'id': nextQuestion['id'].toString(),
+        'i': currentQuestion.questionIndex + 1,
+        'question': nextQuestion['q'],
+        'answers': [
+          nextQuestion['1'],
+          nextQuestion['2'],
+          nextQuestion['3'],
+          nextQuestion['4'],
+        ],
+        'd': nextQuestion['d'],
+      }),
+    },
+  );
 }
 
 class Question {
@@ -78,6 +109,8 @@ class Question {
   final String question;
   final List<String> answers;
   final int? correctAnswerIndex;
+  final int questionIndex;
+  final int duration;
 
   Question({
     required this.gameID,
@@ -85,13 +118,17 @@ class Question {
     required this.answers,
     this.correctAnswerIndex,
     required this.questionID,
+    required this.duration,
+    required this.questionIndex,
   });
   Question.empty()
     : gameID = '',
       question = '',
       answers = ['', '', '', ''],
       questionID = '',
-      correctAnswerIndex = null;
+      correctAnswerIndex = null,
+      questionIndex = 0,
+      duration = 0;
 
   @override
   bool operator ==(Object other) {
@@ -182,9 +219,6 @@ Future<List<Score>> getPodium({
     collectionId: '685990a30018382797dc',
     documentId: gameID,
   );
-  print('Game ID: $gameID');
-  print('Game data: ${game.data}');
-  print('Scores: ${game.data['scores']}');
   final payload = jsonDecode(game.data['scores']);
   final List<Score> podium = (payload as Map<String, dynamic>).entries
       .map(

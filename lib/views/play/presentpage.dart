@@ -133,7 +133,11 @@ class _PresentPageState extends State<PresentPage> {
           Navigator.pushNamed(
             context,
             '/play/podium',
-            arguments: {'gameID': q.gameID},
+            arguments: {
+              'gameID': q.gameID,
+              'currentQuestion': q,
+              'code': arguments['code'],
+            },
           );
         },
         tooltip: 'Next',
