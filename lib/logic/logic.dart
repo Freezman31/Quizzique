@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logger/logger.dart';
 
 Future<bool> isCodeValid(String code, {required Client client}) async {
@@ -166,7 +165,7 @@ class Question {
       data: {
         'questionID': int.parse(questionID),
         'answer': answerIndex,
-        'playerID': await _getDeviceID(),
+        'playerID': await _getDeviceID(client: client),
         'games': gameID,
       },
     );
@@ -181,7 +180,7 @@ class Question {
           collectionId: '685990a30018382797dc',
           documentId: gameID,
         )).data,
-        'playerID': await _getDeviceID(),
+        'playerID': await _getDeviceID(client: client),
         '\$id': id,
         '\$updatedAt': doc.$updatedAt,
       }),
@@ -232,10 +231,72 @@ Future<List<Score>> getPodium({
   return podium..sort((a, b) => b.score.compareTo(a.score));
 }
 
-final String? deviceId = null;
+Future<String> _getDeviceID({required Client client}) async {
+  return (await Account(client).get()).$id;
+}
 
-Future<String> _getDeviceID() async {
-  return deviceId ?? (await const FlutterSecureStorage().read(key: 'id') ?? '');
+Future<User> createAccount({
+  required String username,
+  required String email,
+  required String password,
+  required Client client,
+}) async {
+  Account account = Account(client);
+  try {
+    final User user = await account.create(
+      userId: ID.unique(),
+      email: email,
+      password: password,
+      name: username,
+    );
+    // Remove any existing anonymous session
+    try {
+      await account.deleteSession(sessionId: 'current');
+    } catch (e) {
+      Logger().w('No current session to delete: $e');
+    }
+    await account.createEmailPasswordSession(email: email, password: password);
+    Logger().i('Account created for user: ${user.name}');
+    return user;
+  } catch (e) {
+    Logger().e('Error creating account: $e');
+    if (e is AppwriteException) {
+      if (e.code == 409) {
+        throw Exception('Email already in use');
+      } else if (e.code == 400) {
+        throw Exception('Invalid input data');
+      } else {
+        throw Exception('Failed to create account: ${e.message}');
+      }
+    } else {
+      throw Exception('Failed to create account: $e');
+    }
+  }
+}
+
+Future<User> login({
+  required String email,
+  required String password,
+  required Client client,
+}) async {
+  Account account = Account(client);
+  try {
+    await account.createEmailPasswordSession(email: email, password: password);
+    final user = await account.get();
+    Logger().i('User logged in: ${user.name}');
+    return user;
+  } catch (e) {
+    Logger().e('Error logging in: $e');
+    if (e is AppwriteException) {
+      if (e.code == 401) {
+        throw Exception('Invalid email or password');
+      } else {
+        throw Exception('Failed to log in: ${e.message}');
+      }
+    } else {
+      throw Exception('Failed to log in: $e');
+    }
+  }
 }
 
 class AnswerResponse {

@@ -1,7 +1,10 @@
+import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 
 class Homepage extends StatelessWidget {
-  const Homepage({super.key});
+  final Client client;
+  const Homepage({super.key, required this.client});
 
   @override
   Widget build(BuildContext context) {
@@ -44,15 +47,19 @@ class Homepage extends StatelessWidget {
             width: mq.size.width * 0.95,
             height: mq.size.height * 0.1,
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  '/play/present',
-                  arguments: {
-                    'code':
-                        123456, // Placeholder for code, replace with actual logic
-                  },
-                );
+              onPressed: () async {
+                try {
+                  final User user = await Account(client).get();
+                  if (user.email == '') {
+                    // Session is anonymous, redirect to login
+                    Navigator.of(context).pushNamed('/login');
+                    return;
+                  }
+                } catch (e) {
+                  Navigator.of(context).pushNamed('/login');
+                  return;
+                }
+                Navigator.of(context).pushNamed('/create-quiz');
               },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
