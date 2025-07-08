@@ -1,6 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:logger/logger.dart';
 import 'package:quizapp/views/homepage.dart';
 import 'package:quizapp/views/loginpage.dart';
@@ -27,6 +28,7 @@ void main() async {
   } catch (e) {
     await acc.createAnonymousSession();
   }
+  usePathUrlStrategy();
   runApp(QuizApp(client: client));
 }
 
