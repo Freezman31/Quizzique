@@ -44,11 +44,17 @@ class _PodiumPageState extends State<PodiumPage> {
             ),
             const SizedBox(height: 20),
             if (podium.isNotEmpty)
-              ...podium.asMap().entries.map((entry) {
-                int index = entry.key;
-                Score score = entry.value;
-                return ScoreView(score: score, rank: index + 1);
-              })
+              SizedBox(
+                height: mq.size.height * 0.5,
+                width: mq.size.width * 0.8,
+                child: ListView.builder(
+                  itemCount: podium.length,
+                  itemBuilder: (context, index) {
+                    final score = podium[index];
+                    return ScoreView(score: score, rank: index + 1);
+                  },
+                ),
+              )
             else
               SizedBox(
                 height: mq.size.height * 0.5,
