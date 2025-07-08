@@ -242,12 +242,20 @@ Future<User> createAccount({
   required Client client,
 }) async {
   Account account = Account(client);
+  Databases databases = Databases(client);
   try {
     final User user = await account.create(
       userId: ID.unique(),
       email: email,
       password: password,
       name: username,
+    );
+    // Create a document in the users collection
+    databases.createDocument(
+      databaseId: '6859582600031c46e49c',
+      collectionId: '686ce3b6002c7c4f8bc0',
+      documentId: user.$id,
+      data: {'userID': user.$id},
     );
     // Remove any existing anonymous session
     try {
