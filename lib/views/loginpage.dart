@@ -4,6 +4,7 @@ import 'package:quizapp/logic/logic.dart';
 import 'package:quizapp/utils/utils.dart';
 
 class LoginPage extends StatefulWidget {
+  static const String route = '/login';
   final Client client;
   const LoginPage({super.key, required this.client});
 

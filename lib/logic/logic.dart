@@ -307,6 +307,105 @@ Future<User> login({
   }
 }
 
+Future<List<Quiz>> getQuizzesFromUser({required Client client}) async {
+  Databases databases = Databases(client);
+  final String userID = (await Account(client).get()).$id;
+  Logger().i('Fetching quizzes for user: $userID');
+  final userData = await databases.getDocument(
+    databaseId: '6859582600031c46e49c',
+    collectionId: '686ce3b6002c7c4f8bc0',
+    documentId: userID,
+  );
+  final Map<String, dynamic> payload = userData.data;
+
+  return (payload['quizzes'] as List<dynamic>)
+      .map((quiz) => Quiz.fromJson(quiz))
+      .toList();
+}
+
+Future<GameCreationResponse> presentQuiz({
+  required Client client,
+  required Quiz quiz,
+}) async {
+  Databases databases = Databases(client);
+
+  final firstQuestion = quiz.questions.first;
+  int code = 0;
+  while (true) {
+    code = DateTime.now().millisecondsSinceEpoch % 1000000;
+    // Check if the code is already in use
+    final existingGames = await databases.listDocuments(
+      databaseId: '6859582600031c46e49c',
+      collectionId: '685990a30018382797dc',
+      queries: [Query.equal('code', code)],
+    );
+    if (existingGames.total == 0) {
+      break; // Found a unique code
+    }
+  }
+  final String id = ID.unique();
+
+  await databases.createDocument(
+    databaseId: '6859582600031c46e49c',
+    collectionId: '685990a30018382797dc',
+    documentId: id,
+    data: {
+      'quiz': quiz.id,
+      'currentQuestion': jsonEncode({
+        'id': firstQuestion.questionID,
+        'i': 0,
+        'question': firstQuestion.question,
+        'answers': jsonEncode(firstQuestion.answers),
+        'd': firstQuestion.duration,
+      }),
+      'scores': '{}',
+      'code': code,
+      'owner': (await Account(client).get()).$id,
+    },
+  );
+
+  return GameCreationResponse(gameID: id, code: code);
+}
+
+class GameCreationResponse {
+  final String gameID;
+  final int code;
+
+  GameCreationResponse({required this.gameID, required this.code});
+}
+
+class Quiz {
+  final String id;
+  final String name;
+  final List<Question> questions;
+
+  Quiz({required this.id, required this.name, required this.questions});
+
+  Quiz.empty() : id = '', name = '', questions = [];
+  Quiz.fromJson(Map<String, dynamic> json)
+    : id = json['\$id'] as String,
+      name = json['name'] as String,
+      questions = (json['questions'] as List<dynamic>)
+          .map((q) => jsonDecode(q.toString()))
+          .map(
+            (q) => Question(
+              gameID: '',
+              questionID: q['id'].toString(),
+              questionIndex: q['i'] as int,
+              question: q['q'] as String,
+              answers: [
+                q['1'] as String,
+                q['2'] as String,
+                q['3'] as String,
+                q['4'] as String,
+              ],
+              correctAnswerIndex: q['c'] as int?,
+              duration: q['d'] as int,
+            ),
+          )
+          .toList();
+}
+
 class AnswerResponse {
   final int score;
   final AnswerStatus status;

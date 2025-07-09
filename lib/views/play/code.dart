@@ -2,8 +2,10 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quizapp/logic/logic.dart';
+import 'package:quizapp/views/play/playpage.dart';
 
 class CodePage extends StatefulWidget {
+  static const String route = '/code';
   final Client client;
   const CodePage({super.key, required this.client});
 
@@ -39,7 +41,7 @@ class _CodePageState extends State<CodePage> {
                   if (context.mounted) {
                     Navigator.pushNamed(
                       context,
-                      '/play/quiz',
+                      PlayPage.route,
                       arguments: {'code': int.parse(value)},
                     );
                   }

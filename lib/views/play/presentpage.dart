@@ -1,9 +1,11 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizapp/logic/logic.dart';
+import 'package:quizapp/views/play/podiumpage.dart';
 import 'package:quizapp/widgets/quiz_button.dart';
 
 class PresentPage extends StatefulWidget {
+  static const String route = '/play/present';
   final Client client;
   const PresentPage({super.key, required this.client});
 
@@ -13,42 +15,17 @@ class PresentPage extends StatefulWidget {
 
 class _PresentPageState extends State<PresentPage> {
   Question q = Question.empty();
+
   @override
   Widget build(BuildContext context) {
     final arguments =
         (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{})
             as Map;
-    // Realtime realtime = Realtime(widget.client);
     if (q == Question.empty()) {
-      getCurrentQuestion(
-        client: widget.client,
-        code: arguments['code'] ?? 0,
-      ).then((v) {
-        // realtime
-        //     .subscribe([
-        //       'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
-        //     ])
-        //     .stream
-        //     .listen((event) {
-        //       if (event.events.contains(
-        //         'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.*',
-        //       )) {
-        //         getCurrentQuestion(
-        //           client: widget.client,
-        //           code: arguments['code'] ?? 0,
-        //         ).then((v) {
-        //           setState(() {
-        //             q = v;
-        //           });
-        //         });
-        //       }
-        //     });
-        setState(() {
-          q = v;
-        });
+      setState(() {
+        q = (arguments['quiz'] as Quiz).questions.first;
       });
     }
-    // Page with space for question and 4 buttons for answers
     return Scaffold(
       appBar: AppBar(title: const Text('Play')),
       body: Center(
@@ -132,7 +109,7 @@ class _PresentPageState extends State<PresentPage> {
         onPressed: () {
           Navigator.pushNamed(
             context,
-            '/play/podium',
+            PodiumPage.route,
             arguments: {
               'gameID': q.gameID,
               'currentQuestion': q,

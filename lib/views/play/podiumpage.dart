@@ -1,9 +1,11 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizapp/logic/logic.dart';
+import 'package:quizapp/views/play/presentpage.dart';
 import 'package:quizapp/widgets/score_view.dart';
 
 class PodiumPage extends StatefulWidget {
+  static const String route = '/play/podium';
   final Client client;
   const PodiumPage({super.key, required this.client});
 
@@ -78,7 +80,7 @@ class _PodiumPageState extends State<PodiumPage> {
             currentQuestion: arguments['currentQuestion'],
           ).then(
             (_) => Navigator.of(context).popAndPushNamed(
-              '/play/present',
+              PresentPage.route,
               arguments: {
                 'code': arguments['code'],
                 'gameID': arguments['gameID'],

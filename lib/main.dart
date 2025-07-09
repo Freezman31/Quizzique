@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:logger/logger.dart';
+import 'package:quizapp/views/create/listpage.dart';
 import 'package:quizapp/views/homepage.dart';
 import 'package:quizapp/views/loginpage.dart';
 import 'package:quizapp/views/play/code.dart';
@@ -47,11 +48,12 @@ class QuizApp extends StatelessWidget {
       ),
       home: Homepage(client: client),
       routes: {
-        '/code': (context) => CodePage(client: client),
-        '/play/quiz': (context) => PlayPage(client: client),
-        '/play/present': (context) => PresentPage(client: client),
-        '/play/podium': (context) => PodiumPage(client: client),
-        '/login': (context) => LoginPage(client: client),
+        CodePage.route: (context) => CodePage(client: client),
+        PlayPage.route: (context) => PlayPage(client: client),
+        PresentPage.route: (context) => PresentPage(client: client),
+        PodiumPage.route: (context) => PodiumPage(client: client),
+        LoginPage.route: (context) => LoginPage(client: client),
+        ListPage.route: (context) => ListPage(client: client),
       },
     );
   }

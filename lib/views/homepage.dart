@@ -1,8 +1,12 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
+import 'package:quizapp/views/create/listpage.dart';
+import 'package:quizapp/views/loginpage.dart';
+import 'package:quizapp/views/play/code.dart';
 
 class Homepage extends StatelessWidget {
+  static const String route = '/';
   final Client client;
   const Homepage({super.key, required this.client});
 
@@ -28,7 +32,7 @@ class Homepage extends StatelessWidget {
             height: mq.size.height * 0.1,
             child: ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/code');
+                Navigator.pushNamed(context, CodePage.route);
               },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
@@ -52,14 +56,14 @@ class Homepage extends StatelessWidget {
                   final User user = await Account(client).get();
                   if (user.email == '') {
                     // Session is anonymous, redirect to login
-                    Navigator.of(context).pushNamed('/login');
+                    Navigator.of(context).pushNamed(LoginPage.route);
                     return;
                   }
                 } catch (e) {
-                  Navigator.of(context).pushNamed('/login');
+                  Navigator.of(context).pushNamed(LoginPage.route);
                   return;
                 }
-                Navigator.of(context).pushNamed('/create-quiz');
+                Navigator.of(context).pushNamed(ListPage.route);
               },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(

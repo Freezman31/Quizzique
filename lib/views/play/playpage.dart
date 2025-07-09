@@ -7,6 +7,7 @@ import 'package:quizapp/logic/logic.dart';
 import 'package:quizapp/widgets/quiz_button.dart';
 
 class PlayPage extends StatefulWidget {
+  static const String route = '/play/quiz';
   final Client client;
   const PlayPage({super.key, required this.client});
 
