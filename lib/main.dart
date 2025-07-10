@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
 import 'package:quizapp/views/create/listpage.dart';
 import 'package:quizapp/views/homepage.dart';
@@ -12,6 +13,7 @@ import 'package:quizapp/views/play/podiumpage.dart';
 import 'package:quizapp/views/play/presentpage.dart';
 
 void main() async {
+  GoogleFonts.config.allowRuntimeFetching = false;
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   Client client = Client()
@@ -45,6 +47,7 @@ class QuizApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        textTheme: GoogleFonts.bricolageGrotesqueTextTheme(),
       ),
       home: Homepage(client: client),
       routes: {
