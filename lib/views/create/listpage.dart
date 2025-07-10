@@ -2,7 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizapp/logic/logic.dart';
 import 'package:quizapp/utils/utils.dart';
-import 'package:quizapp/views/play/presentpage.dart';
+import 'package:quizapp/views/play/waitingpage.dart';
 
 class ListPage extends StatefulWidget {
   static const String route = '/create/list';
@@ -59,11 +59,18 @@ class _ListPageState extends State<ListPage> {
                     children: [
                       ElevatedButton(
                         onPressed: () async {
-                          await presentQuiz(client: widget.client, quiz: quiz);
+                          final game = await presentQuiz(
+                            client: widget.client,
+                            quiz: quiz,
+                          );
                           Navigator.pushNamed(
                             context,
-                            PresentPage.route,
-                            arguments: {'quiz': quiz},
+                            WaitingPage.route,
+                            arguments: {
+                              'quiz': quiz,
+                              'gameID': game.gameID,
+                              'gameCode': game.code,
+                            },
                           );
                         },
                         style: ElevatedButton.styleFrom(

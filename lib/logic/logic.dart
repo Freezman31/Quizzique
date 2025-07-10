@@ -367,6 +367,21 @@ Future<GameCreationResponse> presentQuiz({
   return GameCreationResponse(gameID: id, code: code);
 }
 
+Future<List<String>> getPlayers({
+  required Client client,
+  required String gameID,
+}) async {
+  Databases databases = Databases(client);
+  final game = await databases.getDocument(
+    databaseId: '6859582600031c46e49c',
+    collectionId: '685990a30018382797dc',
+    documentId: gameID,
+  );
+  return (game.data['players'] as List<dynamic>)
+      .map((p) => (p['username']?.toString() ?? 'Unknown'))
+      .toList();
+}
+
 class GameCreationResponse {
   final String gameID;
   final int code;

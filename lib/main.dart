@@ -11,6 +11,7 @@ import 'package:quizapp/views/play/code.dart';
 import 'package:quizapp/views/play/playpage.dart';
 import 'package:quizapp/views/play/podiumpage.dart';
 import 'package:quizapp/views/play/presentpage.dart';
+import 'package:quizapp/views/play/waitingpage.dart';
 
 void main() async {
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -57,6 +58,7 @@ class QuizApp extends StatelessWidget {
         PodiumPage.route: (context) => PodiumPage(client: client),
         LoginPage.route: (context) => LoginPage(client: client),
         ListPage.route: (context) => ListPage(client: client),
+        WaitingPage.route: (context) => WaitingPage(client: client),
       },
     );
   }
