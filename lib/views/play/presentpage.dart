@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizapp/logic/logic.dart';
 import 'package:quizapp/views/play/podiumpage.dart';
+import 'package:quizapp/widgets/countdown.dart';
 import 'package:quizapp/widgets/quiz_button.dart';
 
 class PresentPage extends StatefulWidget {
@@ -33,7 +34,7 @@ class _PresentPageState extends State<PresentPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
-              flex: 2,
+              flex: 1,
               child: Text(
                 q.question,
                 style: Theme.of(context).textTheme.headlineLarge,
@@ -42,6 +43,18 @@ class _PresentPageState extends State<PresentPage> {
             const SizedBox(height: 20),
             Expanded(
               flex: 2,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  alignment: Alignment.center,
+                  margin: EdgeInsets.all(16),
+                  child: Countdown(duration: q.duration),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              flex: 3,
               child: Column(
                 children: [
                   Expanded(

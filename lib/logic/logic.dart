@@ -218,7 +218,7 @@ Future<List<Score>> getPodium({
     collectionId: '685990a30018382797dc',
     documentId: gameID,
   );
-  final payload = jsonDecode(game.data['scores']);
+  final payload = jsonDecode(game.data['scores']) ?? <String, dynamic>{};
   final List<Score> podium = (payload as Map<String, dynamic>).entries
       .map(
         (entry) => Score(
