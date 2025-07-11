@@ -1,0 +1,27 @@
+class Constants {
+  static String appwriteUrl = '';
+  static String appwriteProjectId = '';
+  static String databaseId = '';
+  static String usersCollectionId = '';
+  static String quizzesCollectionId = '';
+  static String answersCollectionId = '';
+  static String gamesCollectionId = '';
+
+  static void init({
+    required String appwriteUrl,
+    required String appwriteProjectId,
+    required String databaseId,
+    required String usersCollectionId,
+    required String quizzesCollectionId,
+    required String answersCollectionId,
+    required String gamesCollectionId,
+  }) {
+    Constants.appwriteUrl = appwriteUrl;
+    Constants.appwriteProjectId = appwriteProjectId;
+    Constants.databaseId = databaseId;
+    Constants.usersCollectionId = usersCollectionId;
+    Constants.quizzesCollectionId = quizzesCollectionId;
+    Constants.answersCollectionId = answersCollectionId;
+    Constants.gamesCollectionId = gamesCollectionId;
+  }
+}

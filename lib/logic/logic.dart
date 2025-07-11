@@ -4,6 +4,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
+import 'package:quizapp/utils/constants.dart';
 
 Future<bool> isCodeValid(String code, {required Client client}) async {
   if (code.length != 6) {
@@ -17,8 +18,8 @@ Future<bool> isCodeValid(String code, {required Client client}) async {
   Databases databases = Databases(client);
   try {
     DocumentList result = await databases.listDocuments(
-      databaseId: '6859582600031c46e49c',
-      collectionId: '685990a30018382797dc',
+      databaseId: Constants.databaseId,
+      collectionId: Constants.gamesCollectionId,
       queries: [Query.equal('code', int.parse(code))],
     );
     return result.total > 0;
@@ -35,8 +36,8 @@ Future<Question> getCurrentQuestion({
   Databases databases = Databases(client);
   return databases
       .listDocuments(
-        databaseId: '6859582600031c46e49c',
-        collectionId: '685990a30018382797dc',
+        databaseId: Constants.databaseId,
+        collectionId: Constants.gamesCollectionId,
         queries: [Query.equal('code', code)],
       )
       .then((documents) {
@@ -73,8 +74,8 @@ Future<void> goToNextQuestion({
   Databases databases = Databases(client);
 
   final game = await databases.getDocument(
-    databaseId: '6859582600031c46e49c',
-    collectionId: '685990a30018382797dc',
+    databaseId: Constants.databaseId,
+    collectionId: Constants.gamesCollectionId,
     documentId: gameID,
   );
   final nextQuestion = jsonDecode(
@@ -82,8 +83,8 @@ Future<void> goToNextQuestion({
   );
 
   await databases.updateDocument(
-    databaseId: '6859582600031c46e49c',
-    collectionId: '685990a30018382797dc',
+    databaseId: Constants.databaseId,
+    collectionId: Constants.gamesCollectionId,
     documentId: gameID,
     data: {
       'currentQuestion': jsonEncode({
@@ -159,8 +160,8 @@ class Question {
     Logger().i('Answering question $questionID with answer index $answerIndex');
     final id = ID.unique();
     final doc = await databases.createDocument(
-      databaseId: '6859582600031c46e49c',
-      collectionId: '685d148300346d2203a7',
+      databaseId: Constants.databaseId,
+      collectionId: Constants.answersCollectionId,
       documentId: id,
       data: {
         'questionID': int.parse(questionID),
@@ -176,8 +177,8 @@ class Question {
         'questionID': questionID,
         'answerIndex': answerIndex,
         'games': (await databases.getDocument(
-          databaseId: '6859582600031c46e49c',
-          collectionId: '685990a30018382797dc',
+          databaseId: Constants.databaseId,
+          collectionId: Constants.gamesCollectionId,
           documentId: gameID,
         )).data,
         'playerID': await _getDeviceID(client: client),
@@ -214,8 +215,8 @@ Future<List<Score>> getPodium({
 }) async {
   Databases databases = Databases(client);
   final game = await databases.getDocument(
-    databaseId: '6859582600031c46e49c',
-    collectionId: '685990a30018382797dc',
+    databaseId: Constants.databaseId,
+    collectionId: Constants.gamesCollectionId,
     documentId: gameID,
   );
   final payload = jsonDecode(game.data['scores']) ?? <String, dynamic>{};
@@ -252,8 +253,8 @@ Future<User> createAccount({
     );
     // Create a document in the users collection
     databases.createDocument(
-      databaseId: '6859582600031c46e49c',
-      collectionId: '686ce3b6002c7c4f8bc0',
+      databaseId: Constants.databaseId,
+      collectionId: Constants.usersCollectionId,
       documentId: user.$id,
       data: {'userID': user.$id},
     );
@@ -312,8 +313,8 @@ Future<List<Quiz>> getQuizzesFromUser({required Client client}) async {
   final String userID = (await Account(client).get()).$id;
   Logger().i('Fetching quizzes for user: $userID');
   final userData = await databases.getDocument(
-    databaseId: '6859582600031c46e49c',
-    collectionId: '686ce3b6002c7c4f8bc0',
+    databaseId: Constants.databaseId,
+    collectionId: Constants.usersCollectionId,
     documentId: userID,
   );
   final Map<String, dynamic> payload = userData.data;
@@ -335,8 +336,8 @@ Future<GameCreationResponse> presentQuiz({
     code = DateTime.now().millisecondsSinceEpoch % 1000000;
     // Check if the code is already in use
     final existingGames = await databases.listDocuments(
-      databaseId: '6859582600031c46e49c',
-      collectionId: '685990a30018382797dc',
+      databaseId: Constants.databaseId,
+      collectionId: Constants.gamesCollectionId,
       queries: [Query.equal('code', code)],
     );
     if (existingGames.total == 0) {
@@ -346,8 +347,8 @@ Future<GameCreationResponse> presentQuiz({
   final String id = ID.unique();
 
   await databases.createDocument(
-    databaseId: '6859582600031c46e49c',
-    collectionId: '685990a30018382797dc',
+    databaseId: Constants.databaseId,
+    collectionId: Constants.gamesCollectionId,
     documentId: id,
     data: {
       'quiz': quiz.id,
@@ -373,8 +374,8 @@ Future<List<String>> getPlayers({
 }) async {
   Databases databases = Databases(client);
   final game = await databases.getDocument(
-    databaseId: '6859582600031c46e49c',
-    collectionId: '685990a30018382797dc',
+    databaseId: Constants.databaseId,
+    collectionId: Constants.gamesCollectionId,
     documentId: gameID,
   );
   return (game.data['players'] as List<dynamic>)

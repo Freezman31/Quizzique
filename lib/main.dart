@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
+import 'package:quizapp/utils/constants.dart';
 import 'package:quizapp/views/create/listpage.dart';
 import 'package:quizapp/views/homepage.dart';
 import 'package:quizapp/views/loginpage.dart';
@@ -17,9 +18,20 @@ void main() async {
   GoogleFonts.config.allowRuntimeFetching = false;
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+
+  Constants.init(
+    appwriteUrl: dotenv.get('APPWRITE_URL'),
+    appwriteProjectId: dotenv.get('APPWRITE_PROJECT_ID'),
+    databaseId: dotenv.get('DATABASE_ID'),
+    usersCollectionId: dotenv.get('USERS_COLLECTION_ID'),
+    quizzesCollectionId: dotenv.get('QUIZZES_COLLECTION_ID'),
+    answersCollectionId: dotenv.get('ANSWERS_COLLECTION_ID'),
+    gamesCollectionId: dotenv.get('GAMES_COLLECTION_ID'),
+  );
+
   Client client = Client()
-    ..setEndpoint('https://cloud.appwrite.io/v1') // Your Appwrite endpoint
-    ..setProject(dotenv.get('PROJECT_ID')); // Your Appwrite project ID
+    ..setEndpoint(Constants.appwriteUrl) // Your Appwrite endpoint
+    ..setProject(Constants.appwriteProjectId); // Your Appwrite project ID
   try {
     await client.ping(); // Optional: Check if the client is connected
   } catch (e) {
