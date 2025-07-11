@@ -39,7 +39,7 @@ class _ListPageState extends State<ListPage> {
         ],
       ),
       body: quizzes.isEmpty
-          ? const Center(child: Text('No quizzes found.'))
+          ? const Center(child: Text('No quizzes found (yet).'))
           : ListView.builder(
               itemCount: quizzes.length,
               itemBuilder: (context, index) {
@@ -87,7 +87,13 @@ class _ListPageState extends State<ListPage> {
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/create/edit',
+                            arguments: {'quiz': quiz},
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green[300],
                           shape: RoundedRectangleBorder(

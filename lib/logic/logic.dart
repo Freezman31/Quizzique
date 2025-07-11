@@ -106,14 +106,14 @@ Future<void> goToNextQuestion({
 }
 
 class Question {
-  final String gameID;
-  final String questionID;
-  final String question;
-  final List<String> answers;
-  final int? correctAnswerIndex;
-  final int questionIndex;
-  final int duration;
-  final int durationBeforeAnswer;
+  String gameID;
+  String questionID;
+  String question;
+  List<String> answers;
+  int? correctAnswerIndex;
+  int questionIndex;
+  int duration;
+  int durationBeforeAnswer;
 
   Question({
     required this.gameID,
@@ -396,10 +396,10 @@ class GameCreationResponse {
 }
 
 class Quiz {
-  final String id;
-  final String name;
-  final List<Question> questions;
-  final int durationBeforeAnswer;
+  String id;
+  String name;
+  List<Question> questions;
+  int durationBeforeAnswer;
 
   Quiz({
     required this.id,
@@ -433,6 +433,25 @@ class Quiz {
             ),
           )
           .toList();
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    final Quiz otherQuiz = other as Quiz;
+    return id == otherQuiz.id &&
+        name == otherQuiz.name &&
+        listEquals(questions, otherQuiz.questions) &&
+        durationBeforeAnswer == otherQuiz.durationBeforeAnswer;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        questions.hashCode ^
+        durationBeforeAnswer.hashCode;
+  }
 }
 
 class AnswerResponse {

@@ -5,6 +5,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
 import 'package:quizapp/utils/constants.dart';
+import 'package:quizapp/views/create/editpage.dart';
 import 'package:quizapp/views/create/listpage.dart';
 import 'package:quizapp/views/homepage.dart';
 import 'package:quizapp/views/loginpage.dart';
@@ -72,6 +73,7 @@ class QuizApp extends StatelessWidget {
         LoginPage.route: (context) => LoginPage(client: client),
         ListPage.route: (context) => ListPage(client: client),
         WaitingPage.route: (context) => WaitingPage(client: client),
+        EditPage.route: (context) => EditPage(client: client),
       },
     );
   }

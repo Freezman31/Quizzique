@@ -1,37 +1,53 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-class QuizButton extends StatelessWidget {
+class QuizButton extends StatefulWidget {
   final VoidCallback onPressed;
   final String label;
   final Symbols symbol; // Default symbol, can be changed
+  final bool isEditable;
+  final bool isCorrect;
+  final Function(String)? onFieldSubmitted;
   const QuizButton({
     super.key,
     required this.onPressed,
     required this.label,
     required this.symbol,
+    this.isEditable = false,
+    this.onFieldSubmitted,
+    this.isCorrect = false,
   });
 
   @override
+  State<QuizButton> createState() => _QuizButtonState();
+}
+
+class _QuizButtonState extends State<QuizButton> {
+  @override
   Widget build(BuildContext context) {
+    TextEditingController textController = TextEditingController(
+      text: widget.label,
+    );
     return MaterialButton(
-      onPressed: onPressed,
-      color: getSymbolColor(symbol),
+      onPressed: widget.onPressed,
+      color: getSymbolColor(widget.symbol),
       height: double.infinity,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(5),
+            padding: EdgeInsets.only(left: 8),
             child: Icon(
-              getSymbolIcon(symbol),
+              getSymbolIcon(widget.symbol, widget.isCorrect),
               color: Colors.white,
               size: min(
-                label == ''
+                widget.label == ''
                     ? MediaQuery.of(context).size.height * 0.2
                     : MediaQuery.of(context).size.height * 0.2,
                 min(
-                  label == ''
+                  widget.label == ''
                       ? MediaQuery.of(context).size.width * 0.2
                       : MediaQuery.of(context).size.width * 0.2,
                   75,
@@ -39,14 +55,42 @@ class QuizButton extends StatelessWidget {
               ),
             ),
           ),
-          label != '' ? SizedBox(width: 10) : const SizedBox.shrink(),
-          label != ''
-              ? Expanded(
-                  child: Text(
-                    label,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                )
+          widget.label != '' ? SizedBox(width: 10) : const SizedBox.shrink(),
+          widget.label != ''
+              ? widget.isEditable
+                    ? Expanded(
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            counterStyle: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          minLines: 1,
+                          maxLines: 3,
+                          maxLength: 200,
+                          autocorrect: true,
+                          textCapitalization: TextCapitalization.sentences,
+                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                          style: Theme.of(context).textTheme.titleLarge,
+                          textAlign: TextAlign.center,
+                          controller: textController,
+                          onFieldSubmitted: (value) {
+                            if (widget.onFieldSubmitted != null) {
+                              widget.onFieldSubmitted!(value);
+                            }
+                          },
+                          onTapOutside: (event) {
+                            if (widget.onFieldSubmitted != null) {
+                              widget.onFieldSubmitted!(textController.text);
+                            }
+                          },
+                        ),
+                      )
+                    : Expanded(
+                        child: Text(
+                          widget.label,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      )
               : const SizedBox.shrink(),
         ],
       ),
@@ -56,16 +100,16 @@ class QuizButton extends StatelessWidget {
 
 enum Symbols { square, circle, triangle, diamond }
 
-IconData getSymbolIcon(Symbols symbol) {
+IconData getSymbolIcon(Symbols symbol, bool isCorrect) {
   switch (symbol) {
     case Symbols.square:
-      return Icons.square_outlined;
+      return isCorrect ? Icons.square : Icons.square_outlined;
     case Symbols.circle:
-      return Icons.circle_outlined;
+      return isCorrect ? Icons.circle : Icons.circle_outlined;
     case Symbols.triangle:
-      return Icons.change_history_outlined;
+      return isCorrect ? Icons.star : Icons.star_outline;
     case Symbols.diamond:
-      return Icons.pentagon_outlined;
+      return isCorrect ? Icons.pentagon : Icons.pentagon_outlined;
   }
 }
 
