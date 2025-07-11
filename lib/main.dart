@@ -27,6 +27,7 @@ void main() async {
     quizzesCollectionId: dotenv.get('QUIZZES_COLLECTION_ID'),
     answersCollectionId: dotenv.get('ANSWERS_COLLECTION_ID'),
     gamesCollectionId: dotenv.get('GAMES_COLLECTION_ID'),
+    answerCheckFunctionId: dotenv.get('ANSWER_CHECK_FUNCTION_ID'),
   );
 
   Client client = Client()

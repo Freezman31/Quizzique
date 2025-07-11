@@ -6,6 +6,7 @@ class Constants {
   static String quizzesCollectionId = '';
   static String answersCollectionId = '';
   static String gamesCollectionId = '';
+  static String answerCheckFunctionId = '';
 
   static void init({
     required String appwriteUrl,
@@ -15,6 +16,7 @@ class Constants {
     required String quizzesCollectionId,
     required String answersCollectionId,
     required String gamesCollectionId,
+    required String answerCheckFunctionId,
   }) {
     Constants.appwriteUrl = appwriteUrl;
     Constants.appwriteProjectId = appwriteProjectId;
@@ -23,5 +25,6 @@ class Constants {
     Constants.quizzesCollectionId = quizzesCollectionId;
     Constants.answersCollectionId = answersCollectionId;
     Constants.gamesCollectionId = gamesCollectionId;
+    Constants.answerCheckFunctionId = answerCheckFunctionId;
   }
 }
