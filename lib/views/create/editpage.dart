@@ -14,6 +14,8 @@ class EditPage extends StatefulWidget {
 
 class _EditPageState extends State<EditPage> {
   Quiz quiz = Quiz.empty();
+  Quiz savedQuiz = Quiz.empty();
+
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic> args =
@@ -23,36 +25,87 @@ class _EditPageState extends State<EditPage> {
         quiz = args['quiz'] as Quiz? ?? Quiz.empty();
       });
     }
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Quiz'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
+    return PopScope(
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) {
+          print('didPop: $didPop, result: $result');
+          return;
+        }
+        await _showSaveDialog();
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Quiz'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
             onPressed: () async {
-              // await updateQuiz(client: widget.client, quiz: quiz);
+              if (await _showSaveDialog()) {
+                Navigator.pop(context);
+              }
             },
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              child: Text(
-                quiz.name,
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: QuizEdit(client: widget.client, quiz: quiz),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: () async {
+                // await updateQuiz(client: widget.client, quiz: quiz);
+              },
             ),
           ],
         ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Container(
+                alignment: Alignment.center,
+                child: Text(
+                  quiz.name,
+                  style: Theme.of(context).textTheme.headlineLarge,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: QuizEdit(client: widget.client, quiz: quiz),
+              ),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  Future<bool> _showSaveDialog() async {
+    if (quiz == savedQuiz) {
+      return true;
+    }
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Unsaved Changes'),
+          content: const Text(
+            'You have unsaved changes. Do you want to save them?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Save'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Discard'),
+            ),
+          ],
+        );
+      },
+    ).then((value) => value ?? false);
   }
 }

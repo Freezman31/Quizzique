@@ -23,6 +23,7 @@ class _QuizEditState extends State<QuizEdit> {
       text: currentQuestion.question,
     );
     final double buttonHeight = (MediaQuery.of(context).size.height * 0.2);
+    final ScrollController scrollController = ScrollController();
 
     return Row(
       children: [
@@ -31,29 +32,70 @@ class _QuizEditState extends State<QuizEdit> {
           child: Container(
             alignment: Alignment.topCenter,
             decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: widget.quiz.questions.length,
-              itemBuilder: (context, index) {
-                final question = widget.quiz.questions[index];
-                return ListTile(
-                  title: Text(
-                    question.question,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+            child: Stack(
+              children: [
+                Scrollbar(
+                  thumbVisibility: true,
+                  trackVisibility: false,
+                  controller: scrollController,
+                  child: ReorderableListView.builder(
+                    onReorder: (oldIndex, newIndex) => setState(() {
+                      if (newIndex > oldIndex) newIndex -= 1;
+                      final item = widget.quiz.questions.removeAt(oldIndex);
+                      widget.quiz.questions.insert(newIndex, item);
+                      if (oldIndex == currentQuestionIndex) {
+                        currentQuestionIndex = newIndex;
+                      } else if (newIndex <= currentQuestionIndex &&
+                          oldIndex > currentQuestionIndex) {
+                        currentQuestionIndex++;
+                      } else if (newIndex > currentQuestionIndex &&
+                          oldIndex < currentQuestionIndex) {
+                        currentQuestionIndex--;
+                      }
+                    }),
+                    scrollController: scrollController,
+                    buildDefaultDragHandles: false,
+                    itemCount: widget.quiz.questions.length,
+                    itemBuilder: (context, index) {
+                      final question = widget.quiz.questions[index];
+                      return ReorderableDragStartListener(
+                        index: index,
+                        key: Key(index.toString()),
+                        child: ListTile(
+                          title: Text(
+                            question.question,
+                            style: Theme.of(context).textTheme.titleMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            'Duration: ${question.duration} seconds',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          onTap: () {
+                            setState(() {
+                              currentQuestionIndex = index;
+                            });
+                          },
+                        ),
+                      );
+                    },
                   ),
-                  subtitle: Text(
-                    'Duration: ${question.duration} seconds',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Container(
+                  alignment: Alignment.bottomRight,
+                  padding: const EdgeInsets.all(10.0),
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        widget.quiz.questions.add(Question.empty());
+                        currentQuestionIndex = widget.quiz.questions.length - 1;
+                      });
+                    },
+                    child: const Icon(Icons.add),
                   ),
-                  onTap: () {
-                    setState(() {
-                      currentQuestionIndex = index;
-                    });
-                  },
-                );
-              },
+                ),
+              ],
             ),
           ),
         ),
