@@ -59,6 +59,8 @@ Future<Question> getCurrentQuestion({
           answers: List<String>.from(payload['answers'] as List),
           correctAnswerIndex: payload['correctAnswerIndex'] as int?,
           duration: payload['d'] as int,
+          durationBeforeAnswer:
+              document.data['quiz']['durationBeforeAnswer'] as int,
         );
       })
       .catchError((error) {
@@ -111,6 +113,7 @@ class Question {
   final int? correctAnswerIndex;
   final int questionIndex;
   final int duration;
+  final int durationBeforeAnswer;
 
   Question({
     required this.gameID,
@@ -120,6 +123,7 @@ class Question {
     required this.questionID,
     required this.duration,
     required this.questionIndex,
+    required this.durationBeforeAnswer,
   });
   Question.empty()
     : gameID = '',
@@ -128,6 +132,7 @@ class Question {
       questionID = '',
       correctAnswerIndex = null,
       questionIndex = 0,
+      durationBeforeAnswer = 0,
       duration = 0;
 
   @override
@@ -394,13 +399,20 @@ class Quiz {
   final String id;
   final String name;
   final List<Question> questions;
+  final int durationBeforeAnswer;
 
-  Quiz({required this.id, required this.name, required this.questions});
+  Quiz({
+    required this.id,
+    required this.name,
+    required this.questions,
+    required this.durationBeforeAnswer,
+  });
 
-  Quiz.empty() : id = '', name = '', questions = [];
+  Quiz.empty() : id = '', name = '', questions = [], durationBeforeAnswer = 0;
   Quiz.fromJson(Map<String, dynamic> json)
     : id = json['\$id'] as String,
       name = json['name'] as String,
+      durationBeforeAnswer = json['durationBeforeAnswer'] as int,
       questions = (json['questions'] as List<dynamic>)
           .map((q) => jsonDecode(q.toString()))
           .map(
@@ -417,6 +429,7 @@ class Quiz {
               ],
               correctAnswerIndex: q['c'] as int?,
               duration: q['d'] as int,
+              durationBeforeAnswer: json['durationBeforeAnswer'] as int,
             ),
           )
           .toList();

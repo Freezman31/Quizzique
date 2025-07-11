@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 
 class Countdown extends StatefulWidget {
   final int duration;
-  const Countdown({super.key, required this.duration});
+  final int durationBeforeAnswer;
+  const Countdown({
+    super.key,
+    required this.duration,
+    required this.durationBeforeAnswer,
+  });
 
   @override
   State<Countdown> createState() => _CountdownState();
@@ -17,7 +22,10 @@ class _CountdownState extends State<Countdown> {
   @override
   void initState() {
     super.initState();
-    startCountdown();
+    Future.delayed(
+      Duration(seconds: widget.durationBeforeAnswer),
+      startCountdown,
+    );
   }
 
   @override

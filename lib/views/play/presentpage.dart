@@ -48,7 +48,10 @@ class _PresentPageState extends State<PresentPage> {
                 child: Container(
                   alignment: Alignment.center,
                   margin: EdgeInsets.all(16),
-                  child: Countdown(duration: q.duration),
+                  child: Countdown(
+                    duration: q.duration,
+                    durationBeforeAnswer: q.durationBeforeAnswer,
+                  ),
                 ),
               ),
             ),
