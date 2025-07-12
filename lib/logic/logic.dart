@@ -402,6 +402,12 @@ Future<void> saveQuiz({required Client client, required Quiz quiz}) async {
     collectionId: Constants.quizzesCollectionId,
     documentId: quiz.id,
     data: quiz.toJson(),
+    permissions: [
+      'update("user:$userID")',
+      'delete("user:$userID")',
+      'read("user:$userID")',
+      'read("any")',
+    ],
   );
 }
 
@@ -452,6 +458,9 @@ class Quiz {
           .toList();
 
   Map<String, dynamic> toJson() {
+    if (id == '') {
+      id = ID.unique();
+    }
     return {
       '\$id': id,
       'name': name,

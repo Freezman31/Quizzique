@@ -1,6 +1,5 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:quizapp/logic/logic.dart';
 import 'package:quizapp/widgets/quiz_edit.dart';
 
@@ -51,10 +50,6 @@ class _EditPageState extends State<EditPage> {
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: () async {
-                Logger().d('Saving quiz: ${quiz.name}');
-                Logger().d(
-                  'User id : ${(await Account(widget.client).get()).$id}',
-                );
                 await saveQuiz(client: widget.client, quiz: quiz);
               },
             ),
@@ -126,6 +121,7 @@ class _EditPageState extends State<EditPage> {
   Future<void> editQuizName() async {
     await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         final TextEditingController nameController = TextEditingController(
           text: quiz.name,
@@ -137,7 +133,7 @@ class _EditPageState extends State<EditPage> {
             decoration: const InputDecoration(hintText: 'Enter quiz name'),
             autocorrect: true,
             textCapitalization: TextCapitalization.sentences,
-            maxLength: 50,
+            maxLength: 100,
             keyboardType: TextInputType.text,
             onSubmitted: (value) {
               setState(() {
@@ -152,12 +148,16 @@ class _EditPageState extends State<EditPage> {
                 setState(() {
                   quiz.name = nameController.text;
                 });
+                nameController.dispose();
                 Navigator.of(context).pop();
               },
               child: const Text('Save'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                nameController.dispose();
+                Navigator.of(context).pop();
+              },
               child: const Text('Cancel'),
             ),
           ],
