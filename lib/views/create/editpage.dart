@@ -1,5 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:quizapp/logic/logic.dart';
 import 'package:quizapp/widgets/quiz_edit.dart';
 
@@ -50,6 +51,10 @@ class _EditPageState extends State<EditPage> {
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: () async {
+                Logger().d('Saving quiz: ${quiz.name}');
+                Logger().d(
+                  'User id : ${(await Account(widget.client).get()).$id}',
+                );
                 await saveQuiz(client: widget.client, quiz: quiz);
               },
             ),
@@ -59,12 +64,22 @@ class _EditPageState extends State<EditPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Container(
-                alignment: Alignment.center,
-                child: Text(
-                  quiz.name,
-                  style: Theme.of(context).textTheme.headlineLarge,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    quiz.name,
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () async {
+                      await editQuizName();
+                    },
+                    tooltip: 'Edit Quiz Name',
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -106,5 +121,48 @@ class _EditPageState extends State<EditPage> {
         );
       },
     ).then((value) => value ?? false);
+  }
+
+  Future<void> editQuizName() async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        final TextEditingController nameController = TextEditingController(
+          text: quiz.name,
+        );
+        return AlertDialog(
+          title: const Text('Edit Quiz Name'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(hintText: 'Enter quiz name'),
+            autocorrect: true,
+            textCapitalization: TextCapitalization.sentences,
+            maxLength: 50,
+            keyboardType: TextInputType.text,
+            onSubmitted: (value) {
+              setState(() {
+                quiz.name = nameController.text;
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  quiz.name = nameController.text;
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
