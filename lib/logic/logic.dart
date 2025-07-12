@@ -133,7 +133,7 @@ class Question {
       correctAnswerIndex = null,
       questionIndex = 0,
       durationBeforeAnswer = 0,
-      duration = 0;
+      duration = 30;
 
   @override
   bool operator ==(Object other) {
@@ -388,6 +388,23 @@ Future<List<String>> getPlayers({
       .toList();
 }
 
+Future<void> saveQuiz({required Client client, required Quiz quiz}) async {
+  Databases databases = Databases(client);
+  final String userID = (await Account(client).get()).$id;
+  Logger().i('Saving quiz for user: $userID');
+
+  for (int i = 0; i < quiz.questions.length; i++) {
+    quiz.questions[i].questionIndex = i;
+  }
+
+  await databases.upsertDocument(
+    databaseId: Constants.databaseId,
+    collectionId: Constants.quizzesCollectionId,
+    documentId: quiz.id,
+    data: quiz.toJson(),
+  );
+}
+
 class GameCreationResponse {
   final String gameID;
   final int code;
@@ -433,6 +450,27 @@ class Quiz {
             ),
           )
           .toList();
+
+  Map<String, dynamic> toJson() {
+    return {
+      '\$id': id,
+      'name': name,
+      'durationBeforeAnswer': durationBeforeAnswer,
+      'questions': questions.map((q) {
+        return jsonEncode({
+          'id': q.questionID == '' ? ID.unique() : q.questionID,
+          'i': q.questionIndex,
+          'q': q.question,
+          '1': q.answers[0],
+          '2': q.answers[1],
+          '3': q.answers[2],
+          '4': q.answers[3],
+          'c': q.correctAnswerIndex,
+          'd': q.duration,
+        });
+      }).toList(),
+    };
+  }
 
   @override
   bool operator ==(Object other) {

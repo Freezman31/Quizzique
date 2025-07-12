@@ -28,7 +28,6 @@ class _EditPageState extends State<EditPage> {
     return PopScope(
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) {
-          print('didPop: $didPop, result: $result');
           return;
         }
         await _showSaveDialog();
@@ -51,7 +50,7 @@ class _EditPageState extends State<EditPage> {
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: () async {
-                // await updateQuiz(client: widget.client, quiz: quiz);
+                await saveQuiz(client: widget.client, quiz: quiz);
               },
             ),
           ],

@@ -21,6 +21,10 @@ class _QuizEditState extends State<QuizEdit> {
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
     final currentQuestion = widget.quiz.questions[currentQuestionIndex];
     questionController = TextEditingController(text: currentQuestion.question);
     durationController = TextEditingController(
@@ -38,6 +42,15 @@ class _QuizEditState extends State<QuizEdit> {
   @override
   Widget build(BuildContext context) {
     Question currentQuestion = widget.quiz.questions[currentQuestionIndex];
+
+    // Update controllers when question changes
+    if (questionController.text != currentQuestion.question) {
+      questionController.text = currentQuestion.question;
+    }
+    if (durationController.text != currentQuestion.duration.toString()) {
+      durationController.text = currentQuestion.duration.toString();
+    }
+
     final double buttonHeight = (MediaQuery.of(context).size.height * 0.2);
     final ScrollController scrollController = ScrollController();
 
@@ -147,49 +160,59 @@ class _QuizEditState extends State<QuizEdit> {
                     topLeft: Radius.circular(16),
                   ),
                 ),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Question',
-                    border: InputBorder.none,
+                child: Focus(
+                  onFocusChange: (hasFocus) {
+                    if (!hasFocus) {
+                      setState(() {
+                        currentQuestion.question = questionController.text;
+                      });
+                    }
+                  },
+                  child: TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Question',
+                      border: InputBorder.none,
+                    ),
+                    minLines: 1,
+                    maxLines: 3,
+                    maxLength: 200,
+                    autocorrect: true,
+                    textCapitalization: TextCapitalization.sentences,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                    controller: questionController,
                   ),
-                  minLines: 1,
-                  maxLines: 3,
-                  maxLength: 200,
-                  autocorrect: true,
-                  textCapitalization: TextCapitalization.sentences,
-                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                  style: Theme.of(context).textTheme.titleLarge,
-                  textAlign: TextAlign.center,
-                  controller: questionController,
-                  onFieldSubmitted: (value) {
-                    setState(() {
-                      currentQuestion.question = value;
-                    });
-                  },
-                  onTapOutside: (event) {
-                    setState(() {
-                      currentQuestion.question = questionController.text;
-                    });
-                  },
                 ),
               ),
               const SizedBox(height: 8),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Duration (seconds)',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                maxLength: 3,
-                controller: durationController,
-                onFieldSubmitted: (value) {
-                  setState(() {
-                    currentQuestion.duration = int.tryParse(value) ?? 0;
-                  });
+              Focus(
+                onFocusChange: (hasFocus) {
+                  if (!hasFocus) {
+                    setState(() {
+                      currentQuestion.duration =
+                          int.tryParse(durationController.text) ?? 0;
+                    });
+                  }
                 },
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Duration (seconds)',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  maxLength: 3,
+                  controller: durationController,
+                  onTap: () {
+                    // Move cursor to the end when tapped
+                    durationController.selection = TextSelection.fromPosition(
+                      TextPosition(offset: durationController.text.length),
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -221,7 +244,7 @@ class _QuizEditState extends State<QuizEdit> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: 16),
                         Expanded(
                           child: SizedBox(
                             height: buttonHeight,
@@ -246,7 +269,7 @@ class _QuizEditState extends State<QuizEdit> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
@@ -271,7 +294,7 @@ class _QuizEditState extends State<QuizEdit> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: 16),
                         Expanded(
                           child: SizedBox(
                             height: buttonHeight,

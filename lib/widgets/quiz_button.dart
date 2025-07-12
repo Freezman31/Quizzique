@@ -34,72 +34,94 @@ class _QuizButtonState extends State<QuizButton> {
   }
 
   @override
+  void dispose() {
+    textController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialButton(
-      onPressed: widget.onPressed,
-      color: getSymbolColor(widget.symbol),
-      height: double.infinity,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: EdgeInsets.only(left: 8),
-            child: Icon(
-              getSymbolIcon(widget.symbol, widget.isCorrect),
-              color: Colors.white,
-              size: min(
-                widget.label == ''
-                    ? MediaQuery.of(context).size.height * 0.2
-                    : MediaQuery.of(context).size.height * 0.2,
-                min(
+    // Update controller text only when widget.label changes
+    if (textController.text != widget.label) {
+      textController.text = widget.label;
+    }
+
+    return Focus(
+      onFocusChange: (hasFocus) {
+        if (!hasFocus && widget.isEditable) {
+          if (widget.onFieldSubmitted != null) {
+            widget.onFieldSubmitted!(textController.text);
+          }
+        }
+      },
+      child: MaterialButton(
+        onPressed: widget.onPressed,
+        color: getSymbolColor(widget.symbol),
+        height: double.infinity,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.only(left: 8),
+              child: Icon(
+                getSymbolIcon(widget.symbol, widget.isCorrect),
+                color: Colors.white,
+                size: min(
                   widget.label == ''
-                      ? MediaQuery.of(context).size.width * 0.2
-                      : MediaQuery.of(context).size.width * 0.2,
-                  75,
+                      ? MediaQuery.of(context).size.height * 0.2
+                      : MediaQuery.of(context).size.height * 0.2,
+                  min(
+                    widget.label == ''
+                        ? MediaQuery.of(context).size.width * 0.2
+                        : MediaQuery.of(context).size.width * 0.2,
+                    75,
+                  ),
                 ),
               ),
             ),
-          ),
-          (widget.label != '' || widget.isEditable)
-              ? SizedBox(width: 10)
-              : const SizedBox.shrink(),
-          (widget.label != '' || widget.isEditable)
-              ? widget.isEditable
-                    ? Expanded(
-                        child: TextFormField(
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            counterStyle: Theme.of(context).textTheme.bodySmall,
+            (widget.label != '' || widget.isEditable)
+                ? SizedBox(width: 10)
+                : const SizedBox.shrink(),
+            (widget.label != '' || widget.isEditable)
+                ? widget.isEditable
+                      ? Expanded(
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              counterStyle: Theme.of(
+                                context,
+                              ).textTheme.bodySmall,
+                            ),
+                            minLines: 1,
+                            maxLines: 3,
+                            maxLength: 200,
+                            autocorrect: true,
+                            textCapitalization: TextCapitalization.sentences,
+                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                            style: Theme.of(context).textTheme.titleLarge,
+                            textAlign: TextAlign.center,
+                            controller: textController,
+                            onFieldSubmitted: (value) {
+                              if (widget.onFieldSubmitted != null) {
+                                widget.onFieldSubmitted!(value);
+                              }
+                            },
+                            onTapOutside: (event) {
+                              if (widget.onFieldSubmitted != null) {
+                                widget.onFieldSubmitted!(textController.text);
+                              }
+                            },
                           ),
-                          minLines: 1,
-                          maxLines: 3,
-                          maxLength: 200,
-                          autocorrect: true,
-                          textCapitalization: TextCapitalization.sentences,
-                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                          style: Theme.of(context).textTheme.titleLarge,
-                          textAlign: TextAlign.center,
-                          controller: textController,
-                          onFieldSubmitted: (value) {
-                            if (widget.onFieldSubmitted != null) {
-                              widget.onFieldSubmitted!(value);
-                            }
-                          },
-                          onTapOutside: (event) {
-                            if (widget.onFieldSubmitted != null) {
-                              widget.onFieldSubmitted!(textController.text);
-                            }
-                          },
-                        ),
-                      )
-                    : Expanded(
-                        child: Text(
-                          widget.label,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                      )
-              : const SizedBox.shrink(),
-        ],
+                        )
+                      : Expanded(
+                          child: Text(
+                            widget.label,
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                        )
+                : const SizedBox.shrink(),
+          ],
+        ),
       ),
     );
   }
