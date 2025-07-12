@@ -23,6 +23,7 @@ class _EditPageState extends State<EditPage> {
     if (quiz == Quiz.empty()) {
       setState(() {
         quiz = args['quiz'] as Quiz? ?? Quiz.empty();
+        savedQuiz = quiz.copy();
       });
     }
     return PopScope(
@@ -50,7 +51,27 @@ class _EditPageState extends State<EditPage> {
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: () async {
+                if (quiz == Quiz.empty()) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Error'),
+                      content: Text('Quiz is default. Cannot save.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                  return;
+                }
+                if (quiz.id.isEmpty) {
+                  quiz.id = ID.unique();
+                }
                 await saveQuiz(client: widget.client, quiz: quiz);
+                savedQuiz = quiz;
               },
             ),
           ],
@@ -101,7 +122,11 @@ class _EditPageState extends State<EditPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                if (quiz.id.isEmpty) {
+                  quiz.id = ID.unique();
+                }
+                await saveQuiz(client: widget.client, quiz: quiz);
                 Navigator.of(context).pop(true);
               },
               child: const Text('Save'),

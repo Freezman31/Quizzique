@@ -130,7 +130,7 @@ class Question {
       question = '',
       answers = ['', '', '', ''],
       questionID = '',
-      correctAnswerIndex = null,
+      correctAnswerIndex = 0,
       questionIndex = 0,
       durationBeforeAnswer = 0,
       duration = 30;
@@ -211,6 +211,19 @@ class Question {
             status: AnswerStatus.correct,
           )
         : AnswerResponse(score: 0, status: AnswerStatus.incorrect);
+  }
+
+  Question copy() {
+    return Question(
+      gameID: gameID,
+      question: question,
+      answers: List<String>.from(answers),
+      questionID: questionID,
+      correctAnswerIndex: correctAnswerIndex,
+      questionIndex: questionIndex,
+      durationBeforeAnswer: durationBeforeAnswer,
+      duration: duration,
+    );
   }
 }
 
@@ -391,9 +404,12 @@ Future<List<String>> getPlayers({
 Future<void> saveQuiz({required Client client, required Quiz quiz}) async {
   Databases databases = Databases(client);
   final String userID = (await Account(client).get()).$id;
-  Logger().i('Saving quiz for user: $userID');
+  Logger().i('Saving quiz ${quiz.id} for user: $userID');
 
   for (int i = 0; i < quiz.questions.length; i++) {
+    if (quiz.questions[i].questionID.isEmpty) {
+      quiz.questions[i].questionID = ID.unique();
+    }
     quiz.questions[i].questionIndex = i;
   }
 
@@ -401,13 +417,25 @@ Future<void> saveQuiz({required Client client, required Quiz quiz}) async {
     databaseId: Constants.databaseId,
     collectionId: Constants.quizzesCollectionId,
     documentId: quiz.id,
-    data: quiz.toJson(),
+    data: quiz.toJson()..addAll({'owner': userID}),
     permissions: [
       'update("user:$userID")',
       'delete("user:$userID")',
       'read("user:$userID")',
       'read("any")',
     ],
+  );
+}
+
+Future<void> deleteQuiz({required Client client, required Quiz quiz}) async {
+  Databases databases = Databases(client);
+  if (quiz.id.isEmpty) {
+    return; // Nothing to delete
+  }
+  await databases.deleteDocument(
+    databaseId: Constants.databaseId,
+    collectionId: Constants.quizzesCollectionId,
+    documentId: quiz.id,
   );
 }
 
@@ -431,7 +459,11 @@ class Quiz {
     required this.durationBeforeAnswer,
   });
 
-  Quiz.empty() : id = '', name = '', questions = [], durationBeforeAnswer = 0;
+  Quiz.empty()
+    : id = '',
+      name = 'New Quiz',
+      questions = [Question.empty()],
+      durationBeforeAnswer = 5;
   Quiz.fromJson(Map<String, dynamic> json)
     : id = json['\$id'] as String,
       name = json['name'] as String,
@@ -498,6 +530,15 @@ class Quiz {
         name.hashCode ^
         questions.hashCode ^
         durationBeforeAnswer.hashCode;
+  }
+
+  Quiz copy() {
+    return Quiz(
+      id: id,
+      name: name,
+      questions: List<Question>.from(questions.map((e) => e.copy())),
+      durationBeforeAnswer: durationBeforeAnswer,
+    );
   }
 }
 

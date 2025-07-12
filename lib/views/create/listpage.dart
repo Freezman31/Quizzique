@@ -92,7 +92,7 @@ class _ListPageState extends State<ListPage> {
                             context,
                             '/create/edit',
                             arguments: {'quiz': quiz},
-                          );
+                          ).then((_) => fetchQuizzes());
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green[300],
@@ -106,6 +106,14 @@ class _ListPageState extends State<ListPage> {
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () async {
+                          await deleteQuiz(client: widget.client, quiz: quiz);
+                          fetchQuizzes();
+                        },
+                        icon: const Icon(Icons.delete),
+                      ),
                     ],
                   ),
                 );
@@ -113,7 +121,12 @@ class _ListPageState extends State<ListPage> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigator.pushNamed(context, '/create/quiz');
+          Quiz newQuiz = Quiz.empty();
+          Navigator.pushNamed(
+            context,
+            '/create/edit',
+            arguments: {'quiz': newQuiz},
+          ).then((_) => fetchQuizzes());
         },
         tooltip: 'Create Quiz',
         child: const Icon(Icons.add),
