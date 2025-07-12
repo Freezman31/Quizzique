@@ -15,13 +15,29 @@ class QuizEdit extends StatefulWidget {
 
 class _QuizEditState extends State<QuizEdit> {
   int currentQuestionIndex = 0;
+  late TextEditingController questionController;
+  late TextEditingController durationController;
+
+  @override
+  void initState() {
+    super.initState();
+    final currentQuestion = widget.quiz.questions[currentQuestionIndex];
+    questionController = TextEditingController(text: currentQuestion.question);
+    durationController = TextEditingController(
+      text: currentQuestion.duration.toString(),
+    );
+  }
+
+  @override
+  void dispose() {
+    questionController.dispose();
+    durationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     Question currentQuestion = widget.quiz.questions[currentQuestionIndex];
-    TextEditingController textController = TextEditingController(
-      text: currentQuestion.question,
-    );
     final double buttonHeight = (MediaQuery.of(context).size.height * 0.2);
     final ScrollController scrollController = ScrollController();
 
@@ -77,6 +93,21 @@ class _QuizEditState extends State<QuizEdit> {
                               currentQuestionIndex = index;
                             });
                           },
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              setState(() {
+                                widget.quiz.questions.removeAt(index);
+                                if (currentQuestionIndex >= index) {
+                                  currentQuestionIndex =
+                                      (currentQuestionIndex - 1).clamp(
+                                        0,
+                                        widget.quiz.questions.length - 1,
+                                      );
+                                }
+                              });
+                            },
+                          ),
                         ),
                       );
                     },
@@ -129,13 +160,36 @@ class _QuizEditState extends State<QuizEdit> {
                   maxLengthEnforcement: MaxLengthEnforcement.enforced,
                   style: Theme.of(context).textTheme.titleLarge,
                   textAlign: TextAlign.center,
-                  controller: textController,
+                  controller: questionController,
                   onFieldSubmitted: (value) {
                     setState(() {
                       currentQuestion.question = value;
                     });
                   },
+                  onTapOutside: (event) {
+                    setState(() {
+                      currentQuestion.question = questionController.text;
+                    });
+                  },
                 ),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Duration (seconds)',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                maxLength: 3,
+                controller: durationController,
+                onFieldSubmitted: (value) {
+                  setState(() {
+                    currentQuestion.duration = int.tryParse(value) ?? 0;
+                  });
+                },
               ),
               const SizedBox(height: 16),
               Expanded(

@@ -25,11 +25,16 @@ class QuizButton extends StatefulWidget {
 }
 
 class _QuizButtonState extends State<QuizButton> {
+  late TextEditingController textController;
+
+  @override
+  void initState() {
+    super.initState();
+    textController = TextEditingController(text: widget.label);
+  }
+
   @override
   Widget build(BuildContext context) {
-    TextEditingController textController = TextEditingController(
-      text: widget.label,
-    );
     return MaterialButton(
       onPressed: widget.onPressed,
       color: getSymbolColor(widget.symbol),
@@ -55,8 +60,10 @@ class _QuizButtonState extends State<QuizButton> {
               ),
             ),
           ),
-          widget.label != '' ? SizedBox(width: 10) : const SizedBox.shrink(),
-          widget.label != ''
+          (widget.label != '' || widget.isEditable)
+              ? SizedBox(width: 10)
+              : const SizedBox.shrink(),
+          (widget.label != '' || widget.isEditable)
               ? widget.isEditable
                     ? Expanded(
                         child: TextFormField(
