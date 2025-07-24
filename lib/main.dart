@@ -10,6 +10,7 @@ import 'package:quizapp/views/create/listpage.dart';
 import 'package:quizapp/views/homepage.dart';
 import 'package:quizapp/views/loginpage.dart';
 import 'package:quizapp/views/play/code.dart';
+import 'package:quizapp/views/play/customizationpage.dart';
 import 'package:quizapp/views/play/playpage.dart';
 import 'package:quizapp/views/play/podiumpage.dart';
 import 'package:quizapp/views/play/presentpage.dart';
@@ -74,6 +75,7 @@ class QuizApp extends StatelessWidget {
         ListPage.route: (context) => ListPage(client: client),
         WaitingPage.route: (context) => WaitingPage(client: client),
         EditPage.route: (context) => EditPage(client: client),
+        CustomizationPage.route: (context) => CustomizationPage(client: client),
       },
     );
   }

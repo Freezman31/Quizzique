@@ -16,7 +16,7 @@ class PresentPage extends StatefulWidget {
 
 class _PresentPageState extends State<PresentPage> {
   Question q = Question.empty();
-
+  String gameID = '';
   @override
   Widget build(BuildContext context) {
     final arguments =
@@ -25,6 +25,7 @@ class _PresentPageState extends State<PresentPage> {
     if (q == Question.empty()) {
       setState(() {
         q = (arguments['quiz'] as Quiz).questions.first;
+        gameID = arguments['gameID'];
       });
     }
     return Scaffold(
@@ -127,7 +128,7 @@ class _PresentPageState extends State<PresentPage> {
             context,
             PodiumPage.route,
             arguments: {
-              'gameID': q.gameID,
+              'gameID': gameID,
               'currentQuestion': q,
               'code': arguments['code'],
             },

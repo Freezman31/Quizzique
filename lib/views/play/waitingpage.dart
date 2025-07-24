@@ -63,11 +63,16 @@ class _WaitingPageState extends State<WaitingPage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
+          await goToNextQuestion(
+            client: widget.client,
+            gameID: gameID,
+            currentQuestion: Question.empty()..questionIndex = -1,
+          );
           Navigator.pushNamed(
             context,
             PresentPage.route,
-            arguments: {'quiz': quiz, 'code': gameCode},
+            arguments: {'quiz': quiz, 'code': gameCode, 'gameID': gameID},
           );
         },
         tooltip: 'Start Game',

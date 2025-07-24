@@ -2,7 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/views/play/playpage.dart';
+import 'package:quizapp/views/play/customizationpage.dart';
 
 class CodePage extends StatefulWidget {
   static const String route = '/code';
@@ -41,7 +41,7 @@ class _CodePageState extends State<CodePage> {
                   if (context.mounted) {
                     Navigator.pushNamed(
                       context,
-                      PlayPage.route,
+                      CustomizationPage.route,
                       arguments: {'code': int.parse(value)},
                     );
                   }

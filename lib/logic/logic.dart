@@ -157,6 +157,7 @@ class Question {
   Future<AnswerResponse> answer({
     required Client client,
     required int answerIndex,
+    required String playerName,
   }) async {
     if (answerIndex < 0 || answerIndex >= answers.length) {
       throw Exception('Invalid answer index');
@@ -169,39 +170,48 @@ class Question {
       collectionId: Constants.answersCollectionId,
       documentId: id,
       data: {
-        'questionID': int.parse(questionID),
+        'questionID': questionID,
         'answer': answerIndex,
         'playerID': await _getDeviceID(client: client),
         'games': gameID,
       },
     );
     Functions func = Functions(client);
-    final res = await func.createExecution(
-      functionId: Constants.answerCheckFunctionId,
-      body: jsonEncode({
-        'questionID': questionID,
-        'answerIndex': answerIndex,
-        'games': (await databases.getDocument(
-          databaseId: Constants.databaseId,
-          collectionId: Constants.gamesCollectionId,
-          documentId: gameID,
-        )).data,
-        'playerID': await _getDeviceID(client: client),
-        '\$id': id,
-        '\$updatedAt': doc.$updatedAt,
-      }),
-    );
-    if (res.responseStatusCode != 200) {
-      if (res.responseStatusCode == 400) {
-        return AnswerResponse(score: 0, status: AnswerStatus.alreadyAnswered);
-      } else if (res.responseStatusCode == 408) {
-        return AnswerResponse(score: 0, status: AnswerStatus.tooLate);
+    Execution res;
+    while (true) {
+      res = await func.createExecution(
+        functionId: Constants.answerCheckFunctionId,
+        body: jsonEncode({
+          'questionID': questionID,
+          'answerIndex': answerIndex,
+          'games': (await databases.getDocument(
+            databaseId: Constants.databaseId,
+            collectionId: Constants.gamesCollectionId,
+            documentId: gameID,
+          )).data,
+          'playerID': await _getDeviceID(client: client),
+          'playerName': playerName,
+          '\$id': id,
+          '\$updatedAt': doc.$updatedAt,
+        }),
+      );
+      if (res.responseStatusCode != 200) {
+        if (res.responseStatusCode == 400) {
+          return AnswerResponse(score: 0, status: AnswerStatus.alreadyAnswered);
+        } else if (res.responseStatusCode == 408) {
+          return AnswerResponse(score: 0, status: AnswerStatus.tooLate);
+        } else if (res.responseStatusCode == 500) {
+          continue;
+        } else {
+          databases.deleteDocument(
+            databaseId: doc.$databaseId,
+            collectionId: doc.$collectionId,
+            documentId: doc.$id,
+          );
+          break;
+        }
       } else {
-        databases.deleteDocument(
-          databaseId: doc.$databaseId,
-          collectionId: doc.$collectionId,
-          documentId: doc.$id,
-        );
+        break;
       }
     }
     final payload = jsonDecode(res.responseBody)['data'];
@@ -348,7 +358,6 @@ Future<GameCreationResponse> presentQuiz({
 }) async {
   Databases databases = Databases(client);
 
-  final firstQuestion = quiz.questions.first;
   int code = 0;
   while (true) {
     code = DateTime.now().millisecondsSinceEpoch % 1000000;
@@ -371,11 +380,12 @@ Future<GameCreationResponse> presentQuiz({
     data: {
       'quiz': quiz.id,
       'currentQuestion': jsonEncode({
-        'id': firstQuestion.questionID,
-        'i': 0,
-        'question': firstQuestion.question,
-        'answers': jsonEncode(firstQuestion.answers),
-        'd': firstQuestion.duration,
+        'id': '',
+        'i': -1,
+        'question': '',
+        'answers': ['', '', '', ''],
+        'd': 0,
+        'durationBeforeAnswer': 0,
       }),
       'scores': '{}',
       'code': code,
@@ -397,8 +407,45 @@ Future<List<String>> getPlayers({
     documentId: gameID,
   );
   return (game.data['players'] as List<dynamic>)
-      .map((p) => (p['username']?.toString() ?? 'Unknown'))
+      .map((p) => (jsonDecode(p)['username']?.toString() ?? 'Unknown'))
       .toList();
+}
+
+Future<void> addPlayer({
+  required Client client,
+  required int gameCode,
+  required String username,
+}) async {
+  Databases databases = Databases(client);
+  final user = await Account(client).get();
+  final playerData = {'id': user.$id, 'username': username};
+  databases
+      .listDocuments(
+        databaseId: Constants.databaseId,
+        collectionId: Constants.gamesCollectionId,
+        queries: [Query.equal('code', gameCode)],
+      )
+      .then((result) async {
+        if (result.total > 0) {
+          final gameID = result.documents.first.$id;
+          await databases.updateDocument(
+            databaseId: Constants.databaseId,
+            collectionId: Constants.gamesCollectionId,
+            documentId: gameID,
+            data: {
+              'players': [
+                ...((await databases.getDocument(
+                      databaseId: Constants.databaseId,
+                      collectionId: Constants.gamesCollectionId,
+                      documentId: gameID,
+                    )).data['players']
+                    as List<dynamic>),
+                jsonEncode(playerData),
+              ],
+            },
+          );
+        }
+      });
 }
 
 Future<void> saveQuiz({required Client client, required Quiz quiz}) async {

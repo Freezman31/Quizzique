@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,8 @@ class PlayPage extends StatefulWidget {
 class _PlayPageState extends State<PlayPage> {
   Question q = Question.empty();
   Realtime? realtime;
+  DateTime? lastUpdate;
+  String username = '';
   @override
   Widget build(BuildContext context) {
     final arguments =
@@ -41,7 +44,9 @@ class _PlayPageState extends State<PlayPage> {
                     'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
                   ) &&
                   jsonDecode(event.payload['currentQuestion'])['id'] !=
-                      int.parse(q.questionID)) {
+                      q.questionID &&
+                  jsonDecode(event.payload['currentQuestion'])['i'] !=
+                      q.questionIndex) {
                 Logger().i(
                   'New question received: ${jsonDecode(event.payload['currentQuestion'])['id']},',
                 );
@@ -53,7 +58,7 @@ class _PlayPageState extends State<PlayPage> {
                   client: widget.client,
                   code: arguments['code'] ?? 0,
                 ).then((v) {
-                  wait();
+                  wait(false, v.durationBeforeAnswer);
                   setState(() {
                     q = v;
                   });
@@ -61,7 +66,8 @@ class _PlayPageState extends State<PlayPage> {
               }
             });
         setState(() {
-          wait();
+          username = arguments['username'] ?? '';
+          wait(true, 0);
           q = v;
         });
       });
@@ -91,10 +97,13 @@ class _PlayPageState extends State<PlayPage> {
                       onPressed: () async {
                         loading(context: context);
                         result(
+                          lastUpdate: lastUpdate,
+                          q: q,
                           context: context,
                           response: await q.answer(
                             client: widget.client,
                             answerIndex: 1,
+                            playerName: username,
                           ),
                         );
                       },
@@ -108,10 +117,13 @@ class _PlayPageState extends State<PlayPage> {
                       onPressed: () async {
                         loading(context: context);
                         result(
+                          lastUpdate: lastUpdate,
+                          q: q,
                           context: context,
                           response: await q.answer(
                             client: widget.client,
                             answerIndex: 2,
+                            playerName: username,
                           ),
                         );
                       },
@@ -132,10 +144,13 @@ class _PlayPageState extends State<PlayPage> {
                       onPressed: () async {
                         loading(context: context);
                         result(
+                          lastUpdate: lastUpdate,
+                          q: q,
                           context: context,
                           response: await q.answer(
                             client: widget.client,
                             answerIndex: 3,
+                            playerName: username,
                           ),
                         );
                       },
@@ -150,9 +165,12 @@ class _PlayPageState extends State<PlayPage> {
                         loading(context: context);
                         result(
                           context: context,
+                          lastUpdate: lastUpdate,
+                          q: q,
                           response: await q.answer(
                             client: widget.client,
                             answerIndex: 4,
+                            playerName: username,
                           ),
                         );
                       },
@@ -169,7 +187,7 @@ class _PlayPageState extends State<PlayPage> {
     );
   }
 
-  void wait() {
+  void wait(bool waitingStart, int durationInSeconds) {
     showDialog(
       context: context,
       builder: (context) {
@@ -182,7 +200,9 @@ class _PlayPageState extends State<PlayPage> {
               children: [
                 SizedBox(height: 10),
                 Text(
-                  'Look at the question and choose an answer!',
+                  waitingStart
+                      ? 'Wait for the game to start!'
+                      : 'Look at the question and choose an answer!',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 SizedBox(height: 10),
@@ -201,12 +221,14 @@ class _PlayPageState extends State<PlayPage> {
       },
       barrierDismissible: false,
     );
-
-    Future.delayed(const Duration(seconds: 3), () {
-      if (!ModalRoute.of(context)!.isCurrent) {
-        Navigator.pop(context);
-      }
-    });
+    if (!waitingStart) {
+      Future.delayed(Duration(seconds: durationInSeconds), () {
+        if (!ModalRoute.of(context)!.isCurrent) {
+          Navigator.pop(context);
+        }
+      });
+      lastUpdate = DateTime.now();
+    }
   }
 }
 
@@ -245,66 +267,82 @@ void loading({required BuildContext context}) {
   );
 }
 
-void result({required BuildContext context, required AnswerResponse response}) {
-  if (!ModalRoute.of(context)!.isCurrent) {
-    Navigator.pop(context);
-  }
-  showDialog(
-    context: context,
-    builder: (context) {
-      final MediaQueryData mq = MediaQuery.of(context);
-      return AlertDialog(
-        title: Text(
-          response.status == AnswerStatus.correct
-              ? 'You Win!'
-              : response.status == AnswerStatus.incorrect
-              ? 'You Lose!'
-              : response.status == AnswerStatus.tooLate
-              ? 'Too Late!'
-              : 'Already Answered',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        content: SizedBox(
-          width: mq.size.width * 0.8,
-          height: mq.size.height * 0.4,
-          child: Column(
-            children: [
-              Text(
-                response.status == AnswerStatus.correct
-                    ? 'Congratulations! You answered correctly. You won ${response.score} points!'
-                    : response.status == AnswerStatus.incorrect
-                    ? 'Sorry, that was incorrect.'
-                    : response.status == AnswerStatus.tooLate
-                    ? 'Sorry, you took too long to answer.'
-                    : 'You have already answered this question.',
-                style: Theme.of(context).textTheme.headlineSmall,
+void result({
+  required BuildContext context,
+  required AnswerResponse response,
+  required Question q,
+  required DateTime? lastUpdate,
+}) {
+  Future.delayed(
+    Duration(
+      milliseconds: max(
+        q.duration * 1000 -
+            (DateTime.now().difference(lastUpdate!).inMilliseconds),
+        0,
+      ),
+    ),
+    () {
+      if (!ModalRoute.of(context)!.isCurrent) {
+        Navigator.pop(context);
+      }
+      showDialog(
+        context: context,
+        builder: (context) {
+          final MediaQueryData mq = MediaQuery.of(context);
+          return AlertDialog(
+            title: Text(
+              response.status == AnswerStatus.correct
+                  ? 'You Win!'
+                  : response.status == AnswerStatus.incorrect
+                  ? 'You Lose!'
+                  : response.status == AnswerStatus.tooLate
+                  ? 'Too Late!'
+                  : 'Already Answered',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            content: SizedBox(
+              width: mq.size.width * 0.8,
+              height: mq.size.height * 0.4,
+              child: Column(
+                children: [
+                  Text(
+                    response.status == AnswerStatus.correct
+                        ? 'Congratulations! You answered correctly. You won ${response.score} points!'
+                        : response.status == AnswerStatus.incorrect
+                        ? 'Sorry, that was incorrect.'
+                        : response.status == AnswerStatus.tooLate
+                        ? 'Sorry, you took too long to answer.'
+                        : 'You have already answered this question.',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  Expanded(
+                    child: Icon(
+                      response.status == AnswerStatus.correct
+                          ? Icons.check_circle
+                          : response.status == AnswerStatus.incorrect
+                          ? Icons.cancel
+                          : response.status == AnswerStatus.tooLate
+                          ? Icons.hourglass_empty
+                          : Icons.warning,
+                      color: response.status == AnswerStatus.correct
+                          ? Colors.green
+                          : response.status == AnswerStatus.incorrect
+                          ? Colors.red
+                          : response.status == AnswerStatus.tooLate
+                          ? Colors.orange
+                          : Colors.grey,
+                      size: mq.size.height * 0.2,
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: Icon(
-                  response.status == AnswerStatus.correct
-                      ? Icons.check_circle
-                      : response.status == AnswerStatus.incorrect
-                      ? Icons.cancel
-                      : response.status == AnswerStatus.tooLate
-                      ? Icons.hourglass_empty
-                      : Icons.warning,
-                  color: response.status == AnswerStatus.correct
-                      ? Colors.green
-                      : response.status == AnswerStatus.incorrect
-                      ? Colors.red
-                      : response.status == AnswerStatus.tooLate
-                      ? Colors.orange
-                      : Colors.grey,
-                  size: mq.size.height * 0.2,
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
+        barrierDismissible: false,
       );
     },
-    barrierDismissible: false,
   );
 }
