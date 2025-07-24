@@ -15,6 +15,8 @@ class PodiumPage extends StatefulWidget {
 
 class _PodiumPageState extends State<PodiumPage> {
   List<Score> podium = [];
+  Quiz quiz = Quiz.empty();
+  int questionIndex = 0;
   @override
   Widget build(BuildContext context) {
     final arguments =
@@ -26,6 +28,8 @@ class _PodiumPageState extends State<PodiumPage> {
         pod,
       ) {
         setState(() {
+          quiz = arguments['quiz'] as Quiz;
+          questionIndex = arguments['currentQuestionIndex'] ?? 0;
           podium = pod;
         });
       });
@@ -84,6 +88,8 @@ class _PodiumPageState extends State<PodiumPage> {
               arguments: {
                 'code': arguments['code'],
                 'gameID': arguments['gameID'],
+                'quiz': quiz,
+                'currentQuestionIndex': questionIndex + 1, // Next question
               },
             ),
           );

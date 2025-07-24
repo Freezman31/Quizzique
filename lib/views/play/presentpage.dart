@@ -17,6 +17,8 @@ class PresentPage extends StatefulWidget {
 class _PresentPageState extends State<PresentPage> {
   Question q = Question.empty();
   String gameID = '';
+  int questionIndex = 0;
+  Quiz quiz = Quiz.empty();
   @override
   Widget build(BuildContext context) {
     final arguments =
@@ -24,7 +26,9 @@ class _PresentPageState extends State<PresentPage> {
             as Map;
     if (q == Question.empty()) {
       setState(() {
-        q = (arguments['quiz'] as Quiz).questions.first;
+        questionIndex = arguments['currentQuestionIndex'] ?? 0;
+        quiz = arguments['quiz'] as Quiz;
+        q = quiz.questions[questionIndex];
         gameID = arguments['gameID'];
       });
     }
@@ -131,6 +135,8 @@ class _PresentPageState extends State<PresentPage> {
               'gameID': gameID,
               'currentQuestion': q,
               'code': arguments['code'],
+              'quiz': quiz,
+              'currentQuestionIndex': questionIndex,
             },
           );
         },
