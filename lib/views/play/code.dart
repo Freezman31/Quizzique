@@ -27,36 +27,35 @@ class _CodePageState extends State<CodePage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Quiz Code')),
       body: Center(
-        child: Column(
-          children: [
-            TextField(
-              readOnly: false,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineMedium,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                hintText: 'Enter Quiz Code',
-                hintStyle: Theme.of(context).textTheme.headlineSmall,
-              ),
-              autocorrect: false,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(6),
-              ],
-              onSubmitted: (value) async {
-                if (await isCodeValid(value, client: widget.client)) {
-                  if (context.mounted) {
-                    Navigator.pushNamed(
-                      context,
-                      CustomizationPage.route,
-                      arguments: {'code': int.parse(value)},
-                    );
-                  }
-                }
-              },
+        child: Container(
+          margin: EdgeInsets.all(64),
+          child: TextField(
+            readOnly: false,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineMedium,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              hintText: 'Enter Quiz Code',
+              hintStyle: Theme.of(context).textTheme.headlineSmall,
             ),
-          ],
+            autocorrect: false,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(6),
+            ],
+            onSubmitted: (value) async {
+              if (await isCodeValid(value, client: widget.client)) {
+                if (context.mounted) {
+                  Navigator.pushNamed(
+                    context,
+                    CustomizationPage.route,
+                    arguments: {'code': int.parse(value)},
+                  );
+                }
+              }
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
