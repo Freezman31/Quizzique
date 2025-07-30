@@ -1,6 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizapp/logic/logic.dart';
+import 'package:quizapp/views/play/finalpodiumpage.dart';
 import 'package:quizapp/views/play/podiumpage.dart';
 import 'package:quizapp/widgets/countdown.dart';
 import 'package:quizapp/widgets/quiz_button.dart';
@@ -128,6 +129,20 @@ class _PresentPageState extends State<PresentPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          if (questionIndex == quiz.questions.length - 1) {
+            Navigator.pushNamed(
+              context,
+              FinalPodiumPage.route,
+              arguments: {
+                'gameID': gameID,
+                'currentQuestion': q,
+                'code': arguments['code'],
+                'quiz': quiz,
+                'currentQuestionIndex': questionIndex,
+              },
+            );
+            return;
+          }
           Navigator.pushNamed(
             context,
             PodiumPage.route,
