@@ -14,6 +14,14 @@ class CodePage extends StatefulWidget {
 }
 
 class _CodePageState extends State<CodePage> {
+  final TextEditingController _codeController = TextEditingController();
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,10 +60,18 @@ class _CodePageState extends State<CodePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pop(context);
+        onPressed: () async {
+          if (await isCodeValid(_codeController.text, client: widget.client)) {
+            if (context.mounted) {
+              Navigator.pushNamed(
+                context,
+                CustomizationPage.route,
+                arguments: {'code': int.parse(_codeController.text)},
+              );
+            }
+          }
         },
-        child: const Icon(Icons.arrow_back),
+        child: const Icon(Icons.arrow_forward),
       ),
     );
   }

@@ -6,7 +6,7 @@ extension StringPluralization on String {
 
 extension StringNumberExtension on String {
   String spaceSeparateNumbers() {
-    return replaceAllMapped(
+    return padLeft(6, '0').replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
       (Match m) => '${m[1]} ',
     );

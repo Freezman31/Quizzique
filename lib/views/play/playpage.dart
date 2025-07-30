@@ -239,26 +239,29 @@ void loading({required BuildContext context}) {
       final MediaQueryData mq = MediaQuery.of(context);
       return AlertDialog(
         backgroundColor: const Color.fromARGB(51, 0, 0, 0),
-        content: SizedBox(
-          width: mq.size.width * 0.8,
-          height: mq.size.height * 0.4,
-          child: Column(
-            children: [
-              SizedBox(height: 10),
-              Text(
-                'Loading...',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              SizedBox(height: 10),
-              Center(
-                child: SizedBox(
-                  width: mq.size.height * 0.2,
-                  height: mq.size.height * 0.2,
-                  child: CircularProgressIndicator(),
+        content: Container(
+          color: Theme.of(context).colorScheme.surface,
+          child: SizedBox(
+            width: mq.size.width * 0.8,
+            height: mq.size.height * 0.4,
+            child: Column(
+              children: [
+                SizedBox(height: 10),
+                Text(
+                  'Loading...',
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
-              ),
-              SizedBox(height: 10),
-            ],
+                SizedBox(height: 10),
+                Center(
+                  child: SizedBox(
+                    width: mq.size.height * 0.2,
+                    height: mq.size.height * 0.2,
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
           ),
         ),
       );

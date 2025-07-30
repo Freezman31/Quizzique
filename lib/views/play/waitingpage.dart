@@ -61,7 +61,7 @@ class _WaitingPageState extends State<WaitingPage> {
         title: const Text('Waiting for Players'),
         automaticallyImplyLeading: false,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await goToNextQuestion(
