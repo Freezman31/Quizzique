@@ -8,6 +8,10 @@
         "env": {
             "CHROME_EXECUTABLE": "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
         },
+        "args": [
+            "--web-port=49430",
+            "--web-hostname=localhost"
+        ]
     }
     ]
 }

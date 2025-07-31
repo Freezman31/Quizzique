@@ -7,6 +7,8 @@ class Constants {
   static String answersCollectionId = '';
   static String gamesCollectionId = '';
   static String answerCheckFunctionId = '';
+  static String url = '';
+  static String port = '';
 
   static void init({
     required String appwriteUrl,
@@ -17,6 +19,8 @@ class Constants {
     required String answersCollectionId,
     required String gamesCollectionId,
     required String answerCheckFunctionId,
+    required String url,
+    String port = '',
   }) {
     Constants.appwriteUrl = appwriteUrl;
     Constants.appwriteProjectId = appwriteProjectId;
@@ -26,5 +30,7 @@ class Constants {
     Constants.answersCollectionId = answersCollectionId;
     Constants.gamesCollectionId = gamesCollectionId;
     Constants.answerCheckFunctionId = answerCheckFunctionId;
+    Constants.url = url;
+    Constants.port = port;
   }
 }

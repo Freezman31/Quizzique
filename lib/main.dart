@@ -31,6 +31,8 @@ void main() async {
     answersCollectionId: dotenv.get('ANSWERS_COLLECTION_ID'),
     gamesCollectionId: dotenv.get('GAMES_COLLECTION_ID'),
     answerCheckFunctionId: dotenv.get('ANSWER_CHECK_FUNCTION_ID'),
+    url: dotenv.get('URL', fallback: ''),
+    port: dotenv.get('PORT', fallback: '443'),
   );
 
   Client client = Client()
@@ -78,6 +80,19 @@ class QuizApp extends StatelessWidget {
         EditPage.route: (context) => EditPage(client: client),
         CustomizationPage.route: (context) => CustomizationPage(client: client),
         FinalPodiumPage.route: (context) => FinalPodiumPage(client: client),
+      },
+      onGenerateRoute: (settings) {
+        final uri = Uri.parse(settings.name ?? '');
+        if (uri.path == CustomizationPage.route) {
+          final code = uri.queryParameters['code'];
+          if (code != null) {
+            return MaterialPageRoute(
+              builder: (context) => CustomizationPage(client: client),
+              settings: RouteSettings(arguments: {'code': int.tryParse(code)}),
+            );
+          }
+        }
+        return null;
       },
     );
   }

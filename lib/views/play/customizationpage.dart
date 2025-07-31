@@ -38,6 +38,8 @@ class _CustomizationPageState extends State<CustomizationPage> {
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       if (args != null && args.containsKey('code')) {
         code = args['code'];
+      } else if (Uri.base.queryParameters['code'] != null) {
+        code = int.tryParse(Uri.base.queryParameters['code'] ?? '') ?? -1;
       }
     }
     final mq = MediaQuery.of(context);

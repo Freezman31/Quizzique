@@ -1,6 +1,8 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:quizapp/logic/logic.dart';
+import 'package:quizapp/utils/constants.dart';
 import 'package:quizapp/utils/utils.dart';
 import 'package:quizapp/views/play/presentpage.dart';
 
@@ -81,22 +83,54 @@ class _WaitingPageState extends State<WaitingPage> {
       body: Column(
         children: [
           Center(
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Game Code: ',
-                    style: Theme.of(context).textTheme.displayLarge,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Game Code: ',
+                        style: Theme.of(context).textTheme.displayMedium,
+                      ),
+                      TextSpan(
+                        text: gameCode.toString().spaceSeparateNumbers(),
+                        style: Theme.of(context).textTheme.displayMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                      ),
+                    ],
                   ),
-                  TextSpan(
-                    text: gameCode.toString().spaceSeparateNumbers(),
-                    style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
+                ),
+                const SizedBox(width: 40),
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        actions: [],
+                        content: QrImageView(
+                          data:
+                              '${Constants.url}:${Constants.port}/play/customization?code=${gameCode.toString()}',
+
+                          version: QrVersions.auto,
+                          size: 400,
+                          padding: const EdgeInsets.all(8),
+                        ),
+                      ),
+                    );
+                  },
+                  child: QrImageView(
+                    data:
+                        '${Constants.url}:${Constants.port}/play/customization?code=${gameCode.toString()}',
+                    size: 100,
+                    version: QrVersions.auto,
+                    padding: const EdgeInsets.all(8),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 20),
