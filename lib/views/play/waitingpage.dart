@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -109,17 +111,43 @@ class _WaitingPageState extends State<WaitingPage> {
                   onTap: () {
                     showDialog(
                       context: context,
-                      builder: (context) => AlertDialog(
-                        actions: [],
-                        content: QrImageView(
-                          data:
-                              '${Constants.url}:${Constants.port}/play/customization?code=${gameCode.toString()}',
-
-                          version: QrVersions.auto,
-                          size: 400,
-                          padding: const EdgeInsets.all(8),
-                        ),
-                      ),
+                      builder: (context) {
+                        final MediaQueryData mq = MediaQuery.of(context);
+                        final double size = min(
+                          mq.size.width * 0.6,
+                          mq.size.height * 0.6,
+                        );
+                        return AlertDialog(
+                          insetPadding: EdgeInsets.zero,
+                          contentPadding: EdgeInsets.zero,
+                          actionsAlignment: MainAxisAlignment.center,
+                          actions: [
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('Close'),
+                            ),
+                          ],
+                          actionsPadding: EdgeInsets.only(bottom: 16),
+                          clipBehavior: Clip.antiAliasWithSaveLayer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          content: Container(
+                            margin: EdgeInsets.all(32),
+                            width: size,
+                            height: size,
+                            child: QrImageView(
+                              data:
+                                  '${Constants.url}:${Constants.port}/play/customization?code=${gameCode.toString()}',
+                              version: QrVersions.auto,
+                              padding: EdgeInsets.zero,
+                              size: size,
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                   child: QrImageView(
