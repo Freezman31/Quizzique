@@ -237,7 +237,7 @@ class Question {
   }
 }
 
-Future<List<Score>> getPodium({
+Future<List<Score>> getScores({
   required Client client,
   required String gameID,
 }) async {
@@ -258,6 +258,36 @@ Future<List<Score>> getPodium({
       )
       .toList();
   return podium..sort((a, b) => b.score.compareTo(a.score));
+}
+
+Future<Score> getPlayerScore({
+  required Client client,
+  required String gameID,
+}) async {
+  final List<Score> scores = await getScores(client: client, gameID: gameID);
+  final String deviceID = await _getDeviceID(client: client);
+  final Score playerScore = scores.firstWhere(
+    (score) => score.playerID == deviceID,
+    orElse: () => Score(playerID: deviceID, score: 0, playerName: 'You'),
+  );
+  playerScore.ranking = scores.indexOf(playerScore) + 1;
+  return playerScore;
+}
+
+Future<void> endGame({required Client client, required String gameID}) async {
+  Databases databases = Databases(client);
+  try {
+    await databases.updateDocument(
+      databaseId: Constants.databaseId,
+      collectionId: Constants.gamesCollectionId,
+      documentId: gameID,
+      data: {'ended': true},
+    );
+    Logger().i('Game $gameID ended successfully');
+  } catch (e) {
+    Logger().e('Error ending game $gameID: $e');
+    throw Exception('Failed to end game: $e');
+  }
 }
 
 Future<String> _getDeviceID({required Client client}) async {
@@ -599,12 +629,14 @@ class AnswerResponse {
 class Score {
   final String playerID;
   final int score;
+  int? ranking;
   final String playerName;
 
   Score({
     required this.playerID,
     required this.score,
     required this.playerName,
+    this.ranking,
   });
 }
 

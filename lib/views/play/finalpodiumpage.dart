@@ -25,7 +25,7 @@ class _FinalPodiumPageState extends State<FinalPodiumPage> {
             as Map;
 
     if (podium.isEmpty) {
-      getPodium(client: widget.client, gameID: arguments['gameID'] ?? '').then((
+      getScores(client: widget.client, gameID: arguments['gameID'] ?? '').then((
         pod,
       ) {
         setState(() {

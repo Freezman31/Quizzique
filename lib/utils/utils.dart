@@ -4,6 +4,15 @@ extension StringPluralization on String {
   }
 }
 
+extension StringOrdinal on int {
+  String ordinate() {
+    if (this == 1) return '${this}st';
+    if (this == 2) return '${this}nd';
+    if (this == 3) return '${this}rd';
+    return '${this}th';
+  }
+}
+
 extension StringNumberExtension on String {
   String spaceSeparateNumbers() {
     return padLeft(6, '0').replaceAllMapped(
