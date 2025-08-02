@@ -1,8 +1,8 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/widgets/quiz_button.dart';
+import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/widgets/quiz_button.dart';
 
 class QuizEdit extends StatefulWidget {
   final Client client;

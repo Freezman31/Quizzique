@@ -1,7 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/utils/utils.dart';
+import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/utils/utils.dart';
 
 class LoginPage extends StatefulWidget {
   static const String route = '/login';

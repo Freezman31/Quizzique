@@ -1,8 +1,8 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/views/play/presentpage.dart';
-import 'package:quizapp/widgets/score_view.dart';
+import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/views/play/presentpage.dart';
+import 'package:quizzique/widgets/score_view.dart';
 
 class PodiumPage extends StatefulWidget {
   static const String route = '/play/podium';

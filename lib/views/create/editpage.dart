@@ -1,7 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/widgets/quiz_edit.dart';
+import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/widgets/quiz_edit.dart';
 
 class EditPage extends StatefulWidget {
   static const String route = '/create/edit';

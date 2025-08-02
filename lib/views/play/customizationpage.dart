@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/views/play/playpage.dart';
+import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/views/play/playpage.dart';
 
 class CustomizationPage extends StatefulWidget {
   static const String route = '/play/customization';

@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/utils/constants.dart';
-import 'package:quizapp/utils/utils.dart';
-import 'package:quizapp/views/play/presentpage.dart';
+import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/utils/constants.dart';
+import 'package:quizzique/utils/utils.dart';
+import 'package:quizzique/views/play/presentpage.dart';
 
 class WaitingPage extends StatefulWidget {
   static const String route = '/play/waiting';

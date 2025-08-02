@@ -1,8 +1,8 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/views/play/customizationpage.dart';
+import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/views/play/customizationpage.dart';
 
 class CodePage extends StatefulWidget {
   static const String route = '/code';

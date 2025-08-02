@@ -1,10 +1,10 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/views/play/finalpodiumpage.dart';
-import 'package:quizapp/views/play/podiumpage.dart';
-import 'package:quizapp/widgets/countdown.dart';
-import 'package:quizapp/widgets/quiz_button.dart';
+import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/views/play/finalpodiumpage.dart';
+import 'package:quizzique/views/play/podiumpage.dart';
+import 'package:quizzique/widgets/countdown.dart';
+import 'package:quizzique/widgets/quiz_button.dart';
 
 class PresentPage extends StatefulWidget {
   static const String route = '/play/present';

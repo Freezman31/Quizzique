@@ -1,9 +1,9 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
-import 'package:quizapp/views/create/listpage.dart';
-import 'package:quizapp/views/loginpage.dart';
-import 'package:quizapp/views/play/code.dart';
+import 'package:quizzique/views/create/listpage.dart';
+import 'package:quizzique/views/loginpage.dart';
+import 'package:quizzique/views/play/code.dart';
 
 class HomePage extends StatelessWidget {
   static const String route = '/';

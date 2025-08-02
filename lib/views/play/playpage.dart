@@ -4,11 +4,11 @@ import 'dart:math';
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/utils/constants.dart';
-import 'package:quizapp/utils/utils.dart';
-import 'package:quizapp/views/homepage.dart';
-import 'package:quizapp/widgets/quiz_button.dart';
+import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/utils/constants.dart';
+import 'package:quizzique/utils/utils.dart';
+import 'package:quizzique/views/homepage.dart';
+import 'package:quizzique/widgets/quiz_button.dart';
 
 class PlayPage extends StatefulWidget {
   static const String route = '/play/quiz';

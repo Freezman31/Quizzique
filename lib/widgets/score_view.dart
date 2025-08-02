@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:quizapp/logic/logic.dart';
-import 'package:quizapp/utils/utils.dart';
+import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/utils/utils.dart';
 
 class ScoreView extends StatelessWidget {
   final Score score;

@@ -4,7 +4,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
-import 'package:quizapp/utils/constants.dart';
+import 'package:quizzique/utils/constants.dart';
 
 Future<bool> isCodeValid(String code, {required Client client}) async {
   if (code.length != 6) {
