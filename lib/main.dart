@@ -20,7 +20,7 @@ import 'package:quizzique/views/play/waitingpage.dart';
 void main() async {
   GoogleFonts.config.allowRuntimeFetching = false;
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: "dotenv");
 
   Constants.init(
     appwriteUrl: dotenv.get('APPWRITE_URL'),
@@ -61,7 +61,7 @@ class QuizApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Quiz App',
+      title: 'Quizzique',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
