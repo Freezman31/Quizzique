@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:quizapp/logic/logic.dart';
 import 'package:quizapp/utils/utils.dart';
+import 'package:quizapp/views/homepage.dart';
 import 'package:quizapp/widgets/quiz_button.dart';
 
 class PlayPage extends StatefulWidget {
@@ -372,14 +373,35 @@ void result({
           width: double.maxFinite,
           child: Column(
             children: [
-              Text(
-                'Congratulations! You are\n${score.ranking!.ordinate()}',
-                style: Theme.of(context).textTheme.headlineLarge,
+              RichText(
+                text: TextSpan(
+                  text: 'You finished in the ',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                  children: [
+                    TextSpan(
+                      text: '${score.ranking?.ordinate()} place',
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: score.ranking == 1
+                                ? Color(0xffFFD700)
+                                : score.ranking == 2
+                                ? Color(0xffc0c0c0)
+                                : score.ranking == 3
+                                ? Color(0xffcd7f32)
+                                : Colors.black,
+                          ),
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.popUntil(
+                    context,
+                    (route) => route.settings.name == HomePage.route,
+                  );
                 },
                 child: Text('Close'),
               ),

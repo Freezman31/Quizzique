@@ -18,6 +18,7 @@ class _FinalPodiumPageState extends State<FinalPodiumPage> {
   List<Score> podium = [];
   Quiz quiz = Quiz.empty();
   int questionIndex = 0;
+  String gameID = '';
   @override
   Widget build(BuildContext context) {
     final arguments =
@@ -32,6 +33,7 @@ class _FinalPodiumPageState extends State<FinalPodiumPage> {
           quiz = arguments['quiz'] as Quiz;
           questionIndex = arguments['currentQuestionIndex'] ?? 0;
           podium = pod;
+          gameID = arguments['gameID'] ?? '';
         });
       });
     }
@@ -141,10 +143,10 @@ class _FinalPodiumPageState extends State<FinalPodiumPage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
+          await deleteGame(client: widget.client, gameID: gameID);
           Navigator.of(context).popUntil((route) {
-            return route.settings.name == Homepage.route ||
-                route.settings.name == '/';
+            return route.settings.name == HomePage.route;
           });
         },
         tooltip: 'Finish',

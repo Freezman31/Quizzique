@@ -290,6 +290,24 @@ Future<void> endGame({required Client client, required String gameID}) async {
   }
 }
 
+Future<void> deleteGame({
+  required Client client,
+  required String gameID,
+}) async {
+  Databases databases = Databases(client);
+  try {
+    await databases.deleteDocument(
+      databaseId: Constants.databaseId,
+      collectionId: Constants.gamesCollectionId,
+      documentId: gameID,
+    );
+    Logger().i('Game $gameID deleted successfully');
+  } catch (e) {
+    Logger().e('Error deleting game $gameID: $e');
+    throw Exception('Failed to delete game: $e');
+  }
+}
+
 Future<String> _getDeviceID({required Client client}) async {
   return (await Account(client).get()).$id;
 }

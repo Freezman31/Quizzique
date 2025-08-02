@@ -5,10 +5,10 @@ import 'package:quizapp/views/create/listpage.dart';
 import 'package:quizapp/views/loginpage.dart';
 import 'package:quizapp/views/play/code.dart';
 
-class Homepage extends StatelessWidget {
+class HomePage extends StatelessWidget {
   static const String route = '/';
   final Client client;
-  const Homepage({super.key, required this.client});
+  const HomePage({super.key, required this.client});
 
   @override
   Widget build(BuildContext context) {

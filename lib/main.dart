@@ -68,7 +68,7 @@ class QuizApp extends StatelessWidget {
         useMaterial3: true,
         textTheme: GoogleFonts.bricolageGrotesqueTextTheme(),
       ),
-      home: Homepage(client: client),
+      home: HomePage(client: client),
       routes: {
         CodePage.route: (context) => CodePage(client: client),
         PlayPage.route: (context) => PlayPage(client: client),
