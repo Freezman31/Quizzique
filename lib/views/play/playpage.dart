@@ -5,6 +5,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:quizapp/logic/logic.dart';
+import 'package:quizapp/utils/constants.dart';
 import 'package:quizapp/utils/utils.dart';
 import 'package:quizapp/views/homepage.dart';
 import 'package:quizapp/widgets/quiz_button.dart';
@@ -38,12 +39,12 @@ class _PlayPageState extends State<PlayPage> {
 
         realtime!
             .subscribe([
-              'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
+              'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
             ])
             .stream
             .listen((event) {
               if (event.events.contains(
-                    'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
+                    'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
                   ) &&
                   jsonDecode(event.payload['currentQuestion'])['id'] !=
                       q.questionID &&
@@ -66,7 +67,7 @@ class _PlayPageState extends State<PlayPage> {
                   });
                 });
               } else if (event.events.contains(
-                    'databases.6859582600031c46e49c.collections.685990a30018382797dc.documents.${v.gameID}',
+                    'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
                   ) &&
                   event.payload['ended'] == true) {
                 Logger().i('Game ended, navigating to results page.');
