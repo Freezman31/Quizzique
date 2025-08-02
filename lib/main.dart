@@ -31,8 +31,9 @@ void main() async {
     answersCollectionId: dotenv.get('ANSWERS_COLLECTION_ID'),
     gamesCollectionId: dotenv.get('GAMES_COLLECTION_ID'),
     answerCheckFunctionId: dotenv.get('ANSWER_CHECK_FUNCTION_ID'),
-    url: dotenv.get('URL', fallback: ''),
-    port: dotenv.get('PORT', fallback: '443'),
+    url: dotenv.get('URL'),
+    port: dotenv.get('PORT'),
+    isDemo: dotenv.getBool('DEMO'),
   );
 
   Client client = Client()
@@ -46,7 +47,13 @@ void main() async {
   }
   final acc = Account(client);
   try {
-    await acc.get();
+    if (Constants.isDemo) {
+      Logger().i('Creating anonymous session for demo mode');
+      await acc.deleteSessions();
+      await acc.createAnonymousSession();
+    } else {
+      await acc.get();
+    }
   } catch (e) {
     await acc.createAnonymousSession();
   }

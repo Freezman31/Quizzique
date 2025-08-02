@@ -9,6 +9,7 @@ class Constants {
   static String answerCheckFunctionId = '';
   static String url = '';
   static String port = '';
+  static bool isDemo = false;
 
   static void init({
     required String appwriteUrl,
@@ -21,6 +22,7 @@ class Constants {
     required String answerCheckFunctionId,
     required String url,
     String port = '',
+    bool isDemo = false,
   }) {
     Constants.appwriteUrl = appwriteUrl;
     Constants.appwriteProjectId = appwriteProjectId;
@@ -32,5 +34,6 @@ class Constants {
     Constants.answerCheckFunctionId = answerCheckFunctionId;
     Constants.url = url;
     Constants.port = port;
+    Constants.isDemo = isDemo;
   }
 }
