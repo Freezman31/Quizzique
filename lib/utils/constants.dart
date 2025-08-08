@@ -7,6 +7,7 @@ class Constants {
   static String answersCollectionId = '';
   static String gamesCollectionId = '';
   static String answerCheckFunctionId = '';
+  static String scoresCollectionId = '';
   static String url = '';
   static String port = '';
   static bool isDemo = false;
@@ -20,6 +21,7 @@ class Constants {
     required String answersCollectionId,
     required String gamesCollectionId,
     required String answerCheckFunctionId,
+    required String scoresCollectionId,
     required String url,
     String port = '',
     bool isDemo = false,
@@ -32,6 +34,7 @@ class Constants {
     Constants.answersCollectionId = answersCollectionId;
     Constants.gamesCollectionId = gamesCollectionId;
     Constants.answerCheckFunctionId = answerCheckFunctionId;
+    Constants.scoresCollectionId = scoresCollectionId;
     Constants.url = url;
     Constants.port = port;
     Constants.isDemo = isDemo;

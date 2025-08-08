@@ -242,22 +242,20 @@ Future<List<Score>> getScores({
   required String gameID,
 }) async {
   Databases databases = Databases(client);
-  final game = await databases.getDocument(
+  final scores = await databases.listDocuments(
     databaseId: Constants.databaseId,
-    collectionId: Constants.gamesCollectionId,
-    documentId: gameID,
+    collectionId: Constants.scoresCollectionId,
+    queries: [Query.equal('game', gameID), Query.orderDesc('score')],
   );
-  final payload = jsonDecode(game.data['scores']) ?? <String, dynamic>{};
-  final List<Score> podium = (payload as Map<String, dynamic>).entries
-      .map(
-        (entry) => Score(
-          playerID: entry.key,
-          score: entry.value['s'],
-          playerName: entry.value['name'] ?? entry.key,
-        ),
-      )
-      .toList();
-  return podium..sort((a, b) => b.score.compareTo(a.score));
+
+  return scores.documents.map<Score>((doc) {
+    final data = doc.data;
+    return Score(
+      playerID: data['playerID'],
+      score: data['score'],
+      playerName: data['playerName'],
+    );
+  }).toList();
 }
 
 Future<Score> getPlayerScore({
@@ -365,6 +363,7 @@ Future<User> login({
   required Client client,
 }) async {
   Account account = Account(client);
+  account.deleteSessions();
   try {
     await account.createEmailPasswordSession(email: email, password: password);
     final user = await account.get();
@@ -388,16 +387,23 @@ Future<List<Quiz>> getQuizzesFromUser({required Client client}) async {
   Databases databases = Databases(client);
   final String userID = (await Account(client).get()).$id;
   Logger().i('Fetching quizzes for user: $userID');
-  final userData = await databases.getDocument(
-    databaseId: Constants.databaseId,
-    collectionId: Constants.usersCollectionId,
-    documentId: userID,
-  );
-  final Map<String, dynamic> payload = userData.data;
+  try {
+    final userData = await databases.getDocument(
+      databaseId: Constants.databaseId,
+      collectionId: Constants.usersCollectionId,
+      documentId: userID,
+    );
+    final Map<String, dynamic> payload = userData.data;
 
-  return (payload['quizzes'] as List<dynamic>)
-      .map((quiz) => Quiz.fromJson(quiz))
-      .toList();
+    return (payload['quizzes'] as List<dynamic>)
+        .map((quiz) => Quiz.fromJson(quiz))
+        .toList();
+  } catch (e) {
+    Logger().e(
+      'Error fetching quizzes: $e, probably not quizzes yet from user',
+    );
+    return [];
+  }
 }
 
 Future<GameCreationResponse> presentQuiz({
@@ -435,7 +441,6 @@ Future<GameCreationResponse> presentQuiz({
         'd': 0,
         'durationBeforeAnswer': 0,
       }),
-      'scores': '{}',
       'code': code,
       'owner': (await Account(client).get()).$id,
     },
@@ -474,6 +479,7 @@ Future<void> addPlayer({
         queries: [Query.equal('code', gameCode)],
       )
       .then((result) async {
+        print('result total: ${result.total}');
         if (result.total > 0) {
           final gameID = result.documents.first.$id;
           await databases.updateDocument(
@@ -492,6 +498,8 @@ Future<void> addPlayer({
               ],
             },
           );
+        } else {
+          throw Exception('Game with code $gameCode not found');
         }
       });
 }

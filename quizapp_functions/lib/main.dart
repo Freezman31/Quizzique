@@ -5,6 +5,7 @@ import 'package:dart_appwrite/dart_appwrite.dart';
 
 const String databaseId = '6859582600031c46e49c';
 const String collectionId = '685d148300346d2203a7';
+const String scoreId = '68953e9100224ddb0584';
 const String appwriteEndpoint = 'https://cloud.appwrite.io/v1';
 
 Future main(final context) async {
@@ -23,7 +24,6 @@ Future main(final context) async {
     final String playerId = payload['playerID'];
     final String playerName = payload['playerName'] ?? 'Unknown Player';
     final String gameId = payload['games']['\$id'];
-    final Map<String, dynamic> scores = jsonDecode(payload['games']['scores']);
     final DateTime startTime = DateTime.parse(payload['games']['\$updatedAt']);
     final DateTime submitTime = DateTime.parse(payload['\$updatedAt']);
     final Duration timeAllowed = Duration(
@@ -83,17 +83,39 @@ Future main(final context) async {
           }),
           408);
     }
-    scores.putIfAbsent(playerId, () => {'s': 0, 'name': playerName});
-    scores[playerId]['s'] = scores[playerId]['s'] + score;
-    if (score > 0) {
-      databases.updateDocument(
+
+    if (score > 0 && isCorrect) {
+      final scores = await databases.listDocuments(
         databaseId: databaseId,
-        collectionId: '685990a30018382797dc',
-        documentId: gameId,
-        data: {
-          'scores': jsonEncode(scores),
-        },
+        collectionId: scoreId,
+        queries: [
+          Query.equal('game', gameId),
+          Query.equal('playerID', playerId),
+        ],
       );
+      if (scores.documents.isEmpty) {
+        await databases.createDocument(
+          databaseId: databaseId,
+          collectionId: scoreId,
+          documentId: ID.unique(),
+          data: {
+            'playerID': playerId,
+            'playerName': playerName,
+            'game': gameId,
+            'score': isCorrect ? score : 0,
+          },
+        );
+      } else {
+        final existingScore = scores.documents.first;
+        final newScore =
+            (existingScore.data['score'] as int) + (isCorrect ? score : 0);
+        await databases.updateDocument(
+          databaseId: databaseId,
+          collectionId: scoreId,
+          documentId: existingScore.$id,
+          data: {'score': newScore},
+        );
+      }
     }
     databases.updateDocument(
       databaseId: databaseId,

@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizzique/logic/logic.dart';
 import 'package:quizzique/utils/utils.dart';
+import 'package:quizzique/views/create/listpage.dart';
 
 class LoginPage extends StatefulWidget {
   static const String route = '/login';
@@ -51,7 +52,10 @@ class _LoginPageState extends State<LoginPage> {
                 child: TextField(
                   autocorrect: false,
                   keyboardType: TextInputType.name,
-                  autofillHints: const [AutofillHints.name],
+                  autofillHints: const [
+                    AutofillHints.username,
+                    AutofillHints.newUsername,
+                  ],
                   inputFormatters: [],
                   maxLength: 32,
                   maxLines: 1,
@@ -158,6 +162,12 @@ class _LoginPageState extends State<LoginPage> {
                     return;
                   }
                   if (signingIn) {
+                    await login(
+                      email: email,
+                      password: password,
+                      client: widget.client,
+                    );
+                    Navigator.of(context).pushNamed(ListPage.route);
                   } else {
                     if (password != confirmPassword) {
                       ScaffoldMessenger.of(context).showSnackBar(

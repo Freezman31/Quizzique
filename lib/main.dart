@@ -31,6 +31,7 @@ void main() async {
     answersCollectionId: dotenv.get('ANSWERS_COLLECTION_ID'),
     gamesCollectionId: dotenv.get('GAMES_COLLECTION_ID'),
     answerCheckFunctionId: dotenv.get('ANSWER_CHECK_FUNCTION_ID'),
+    scoresCollectionId: dotenv.get('SCORES_COLLECTION_ID'),
     url: dotenv.get('URL'),
     port: dotenv.get('PORT'),
     isDemo: dotenv.getBool('DEMO'),
