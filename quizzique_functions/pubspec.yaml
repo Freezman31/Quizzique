@@ -1,14 +1,13 @@
-name: quizapp_functions
-description: A sample command-line application.
+name: quizzique_functions
+description: The server-side function for appwrite to use with the Quizzique app
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
 
 environment:
   sdk: ^3.5.0
 
 # Add regular dependencies here.
 dependencies:
-  dart_appwrite: ^16.0.0
+  dart_appwrite: ^16.2.0
   # path: ^1.8.0
 
 dev_dependencies:
