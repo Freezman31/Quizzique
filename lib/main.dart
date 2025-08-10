@@ -18,7 +18,6 @@ import 'package:quizzique/views/play/presentpage.dart';
 import 'package:quizzique/views/play/waitingpage.dart';
 
 void main() async {
-  GoogleFonts.config.allowRuntimeFetching = false;
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "dotenv");
 
