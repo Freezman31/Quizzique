@@ -22,7 +22,9 @@ Future<bool> isCodeValid(String code, {required Client client}) async {
       collectionId: Constants.gamesCollectionId,
       queries: [Query.equal('code', int.parse(code))],
     );
-    return result.total > 0;
+    if (result.total == 0) return false;
+    return jsonDecode(result.documents.first.data['currentQuestion'])['i'] ==
+        -1;
   } catch (e) {
     Logger().e('Error checking code validity: $e');
     return false;

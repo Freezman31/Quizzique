@@ -53,6 +53,12 @@ class _CodePageState extends State<CodePage> {
                     arguments: {'code': int.parse(value)},
                   );
                 }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Invalid code, please try again.'),
+                  ),
+                );
               }
             },
           ),
@@ -68,6 +74,10 @@ class _CodePageState extends State<CodePage> {
                 arguments: {'code': int.parse(_codeController.text)},
               );
             }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Invalid code, please try again.')),
+            );
           }
         },
         child: const Icon(Icons.arrow_forward),

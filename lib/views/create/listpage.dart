@@ -31,6 +31,7 @@ class _ListPageState extends State<ListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Quizzes'),
@@ -47,8 +48,8 @@ class _ListPageState extends State<ListPage> {
                 return ListTile(
                   hoverColor: Colors.grey[300],
                   tileColor: index.isEven
-                      ? Theme.of(context).colorScheme.surface
-                      : Colors.blueGrey[50],
+                      ? colorScheme.surface
+                      : colorScheme.surfaceContainerHighest,
                   title: Text(quiz.name),
                   subtitle: Text(
                     '${quiz.questions.length} ${'question'.pluralize(quiz.questions.length)}',
@@ -74,7 +75,7 @@ class _ListPageState extends State<ListPage> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[300],
+                          backgroundColor: colorScheme.errorContainer,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -95,7 +96,7 @@ class _ListPageState extends State<ListPage> {
                           ).then((_) => fetchQuizzes());
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green[300],
+                          backgroundColor: colorScheme.primaryContainer,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),

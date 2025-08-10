@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
                 Moreover, as this is a demo, you loose your "account" when you close/refresh the app.
                 Enjoy!
                 PS: Please report any bugs you find on the GitHub repository (there will definitely be some).
-                PS2: As this is a demo, if you open another tab, you can play against yourself (or alone) to test the game.
+                PS2: As this (still) is a demo, if you open another tab, you can play against yourself (or alone) to test the game.
                 ''', softWrap: true),
               actions: [
                 TextButton(
@@ -84,7 +84,7 @@ class _HomePageState extends State<HomePage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),
-                backgroundColor: Colors.red,
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               ),
               child: Text(
                 'Play Quiz',
@@ -115,7 +115,9 @@ class _HomePageState extends State<HomePage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),
-                backgroundColor: Colors.green,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.secondaryContainer,
               ),
               child: Text(
                 'Create Quiz',

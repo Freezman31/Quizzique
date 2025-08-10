@@ -72,9 +72,17 @@ class QuizApp extends StatelessWidget {
       title: 'Quizzique',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xff0b172e)),
         useMaterial3: true,
         textTheme: GoogleFonts.bricolageGrotesqueTextTheme(),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Color(0xff0b172e),
+          brightness: Brightness.dark,
+        ),
       ),
       home: HomePage(client: client),
       routes: {
