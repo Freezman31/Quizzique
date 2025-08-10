@@ -19,6 +19,6 @@
 3. **Configure Database:** Set up the collections your app needs in Appwrite's database *(details coming soon)*.
 4. **Update environment variables:** Add your Appwrite details to the `dotenv` file (using the dotenv.example template).
 5. **Prepare to build:** Install [Flutter](https://flutter.dev/) if you haven't already, then run `flutter pub get` to install dependencies.
-6. **Build the app:** Run `flutter build web --wasm` to compile the app for the web. The output will be in the `build/web` directory and can be served using any static file server.
+6. **Build the app:** Run `flutter build web --release` to compile the app for the web. The output will be in the `build/web` directory and can be served using any static file server.
 
 ### This project was created during the Summer of Code 2025 by HackClub.
