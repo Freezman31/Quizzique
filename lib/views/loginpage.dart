@@ -162,12 +162,18 @@ class _LoginPageState extends State<LoginPage> {
                     return;
                   }
                   if (signingIn) {
-                    await login(
-                      email: email,
-                      password: password,
-                      client: widget.client,
-                    );
-                    Navigator.of(context).pushNamed(ListPage.route);
+                    try {
+                      await login(
+                        email: email,
+                        password: password,
+                        client: widget.client,
+                      );
+                      Navigator.of(context).pushNamed(ListPage.route);
+                    } on Exception catch (e) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    }
                   } else {
                     if (password != confirmPassword) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -175,12 +181,19 @@ class _LoginPageState extends State<LoginPage> {
                       );
                       return;
                     }
-                    await createAccount(
-                      username: username,
-                      email: email,
-                      password: password,
-                      client: widget.client,
-                    );
+                    try {
+                      await createAccount(
+                        username: username,
+                        email: email,
+                        password: password,
+                        client: widget.client,
+                        context: context,
+                      );
+                    } on Exception catch (e) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    }
                   }
                 },
                 child: const Text('Submit!'),

@@ -151,8 +151,12 @@ class _QuizEditState extends State<QuizEdit> {
             children: [
               Container(
                 padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 255, 236, 207),
+                decoration: BoxDecoration(
+                  color:
+                      View.of(context).platformDispatcher.platformBrightness ==
+                          Brightness.light
+                      ? Color.fromARGB(255, 255, 236, 207)
+                      : Color.fromARGB(255, 145, 115, 69),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(8),
                     bottomRight: Radius.circular(16),

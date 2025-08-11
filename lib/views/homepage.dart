@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
                 You can create quizzes, play them, and customize the experience.
                 In order to play, you need to create a game code under the 'Create' tab.
                 You can then share this code with your friends to play together.
-                Moreover, as this is a demo, you loose your "account" when you close/refresh the app.
+                Moreover, as this is a demo, you loose your "account" (you can enter bogus data, as long as it looks valid) when you close/refresh the app.
                 Enjoy!
                 PS: Please report any bugs you find on the GitHub repository (there will definitely be some).
                 PS2: As this (still) is a demo, if you open another tab, you can play against yourself (or alone) to test the game.
@@ -100,7 +100,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 try {
                   final User user = await Account(widget.client).get();
-                  if (user.email == '' && !Constants.isDemo) {
+                  if (user.email == '') {
                     // Session is anonymous, redirect to login
                     Navigator.of(context).pushNamed(LoginPage.route);
                     return;

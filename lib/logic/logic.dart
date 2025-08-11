@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:quizzique/utils/constants.dart';
 
@@ -317,9 +318,11 @@ Future<User> createAccount({
   required String email,
   required String password,
   required Client client,
+  required BuildContext context,
 }) async {
   Account account = Account(client);
   Databases databases = Databases(client);
+  await account.deleteSessions();
   try {
     final User user = await account.create(
       userId: ID.unique(),
@@ -365,7 +368,7 @@ Future<User> login({
   required Client client,
 }) async {
   Account account = Account(client);
-  account.deleteSessions();
+  await account.deleteSessions();
   try {
     await account.createEmailPasswordSession(email: email, password: password);
     final user = await account.get();

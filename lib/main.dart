@@ -28,21 +28,32 @@ void main() async {
     final license = await rootBundle.loadString('assets/google_fonts/OFL.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
+  if (dotenv.getBool('DEBUG', fallback: false)) {
+    Logger.level = Level.debug;
+    Logger().i('Debug mode is enabled');
+  } else {
+    Logger.level = Level.error;
+  }
 
-  Constants.init(
-    appwriteUrl: dotenv.get('APPWRITE_URL'),
-    appwriteProjectId: dotenv.get('APPWRITE_PROJECT_ID'),
-    databaseId: dotenv.get('DATABASE_ID'),
-    usersCollectionId: dotenv.get('USERS_COLLECTION_ID'),
-    quizzesCollectionId: dotenv.get('QUIZZES_COLLECTION_ID'),
-    answersCollectionId: dotenv.get('ANSWERS_COLLECTION_ID'),
-    gamesCollectionId: dotenv.get('GAMES_COLLECTION_ID'),
-    answerCheckFunctionId: dotenv.get('ANSWER_CHECK_FUNCTION_ID'),
-    scoresCollectionId: dotenv.get('SCORES_COLLECTION_ID'),
-    url: dotenv.get('URL'),
-    port: dotenv.get('PORT'),
-    isDemo: dotenv.getBool('DEMO'),
-  );
+  try {
+    Constants.init(
+      appwriteUrl: dotenv.get('APPWRITE_URL'),
+      appwriteProjectId: dotenv.get('APPWRITE_PROJECT_ID'),
+      databaseId: dotenv.get('DATABASE_ID'),
+      usersCollectionId: dotenv.get('USERS_COLLECTION_ID'),
+      quizzesCollectionId: dotenv.get('QUIZZES_COLLECTION_ID'),
+      answersCollectionId: dotenv.get('ANSWERS_COLLECTION_ID'),
+      gamesCollectionId: dotenv.get('GAMES_COLLECTION_ID'),
+      answerCheckFunctionId: dotenv.get('ANSWER_CHECK_FUNCTION_ID'),
+      scoresCollectionId: dotenv.get('SCORES_COLLECTION_ID'),
+      url: dotenv.get('URL'),
+      port: dotenv.get('PORT', fallback: ''),
+      isDemo: dotenv.getBool('DEMO', fallback: false),
+    );
+  } catch (e) {
+    Logger().e('Error loading environment variables: $e');
+    return;
+  }
 
   Client client = Client()
     ..setEndpoint(Constants.appwriteUrl) // Your Appwrite endpoint
