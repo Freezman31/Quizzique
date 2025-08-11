@@ -25,9 +25,9 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Create .env file from secret
+      - name: Create dotenv file from secret
         run: |
-          echo "${{ secrets.DOTENV_FILE }}" > .env
+          echo "${{ secrets.DOTENV_FILE }}" > dotenv
         shell: bash
 
       - name: Build Flutter Web
