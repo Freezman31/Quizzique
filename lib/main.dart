@@ -1,5 +1,7 @@
 import 'package:appwrite/appwrite.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,7 +21,13 @@ import 'package:quizzique/views/play/waitingpage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
   await dotenv.load(fileName: "dotenv");
+
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('assets/google_fonts/OFL.txt');
+    yield LicenseEntryWithLineBreaks(['google_fonts'], license);
+  });
 
   Constants.init(
     appwriteUrl: dotenv.get('APPWRITE_URL'),
@@ -81,6 +89,9 @@ class QuizApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: Color(0xff0b172e),
           brightness: Brightness.dark,
+        ),
+        textTheme: GoogleFonts.bricolageGrotesqueTextTheme(
+          ThemeData(brightness: Brightness.dark).textTheme,
         ),
       ),
       home: HomePage(client: client),
