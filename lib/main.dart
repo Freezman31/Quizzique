@@ -98,7 +98,7 @@ class QuizApp extends StatelessWidget {
       },
       onGenerateRoute: (settings) {
         final uri = Uri.parse(settings.name ?? '');
-        if (uri.path == CustomizationPage.route) {
+        if (uri.path.contains(CustomizationPage.route)) {
           final code = uri.queryParameters['code'];
           if (code != null) {
             return MaterialPageRoute(
