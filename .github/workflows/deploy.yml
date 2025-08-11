@@ -31,7 +31,7 @@ jobs:
         shell: bash
 
       - name: Build Flutter Web
-        run: flutter build web --release
+        run: flutter build web --release --base-href /${{ github.event.repository.name }}/
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
