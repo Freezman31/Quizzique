@@ -481,7 +481,6 @@ Future<void> addPlayer({
         queries: [Query.equal('code', gameCode)],
       )
       .then((result) async {
-        print('result total: ${result.total}');
         if (result.total > 0) {
           final gameID = result.documents.first.$id;
           await databases.updateDocument(
