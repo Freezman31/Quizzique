@@ -143,6 +143,16 @@ class _WaitingPageState extends State<WaitingPage> {
                                   '${Constants.url}:${Constants.port}/play/customization?code=${gameCode.toString()}',
                               version: QrVersions.auto,
                               padding: EdgeInsets.zero,
+                              eyeStyle: QrEyeStyle(
+                                color:
+                                    View.of(context)
+                                            .platformDispatcher
+                                            .platformBrightness ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                                eyeShape: QrEyeShape.square,
+                              ),
                               size: size,
                             ),
                           ),
@@ -156,6 +166,15 @@ class _WaitingPageState extends State<WaitingPage> {
                     size: 100,
                     version: QrVersions.auto,
                     padding: const EdgeInsets.all(8),
+                    eyeStyle: QrEyeStyle(
+                      color:
+                          View.of(
+                                context,
+                              ).platformDispatcher.platformBrightness ==
+                              Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                    ),
                   ),
                 ),
               ],
