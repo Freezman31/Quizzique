@@ -33,6 +33,11 @@ jobs:
       - name: Build Flutter Web
         run: flutter build web --release --base-href /${{ github.event.repository.name }}/
 
+      - name: Delete dotenv file
+        run: |
+          rm dotenv
+        shell: bash
+
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
