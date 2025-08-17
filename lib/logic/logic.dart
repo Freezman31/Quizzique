@@ -322,7 +322,6 @@ Future<User> createAccount({
 }) async {
   Account account = Account(client);
   Databases databases = Databases(client);
-  await account.deleteSessions();
   try {
     final User user = await account.create(
       userId: ID.unique(),
@@ -330,20 +329,15 @@ Future<User> createAccount({
       password: password,
       name: username,
     );
+    await account.deleteSessions();
+    await account.createEmailPasswordSession(email: email, password: password);
     // Create a document in the users collection
-    databases.createDocument(
+    await databases.createDocument(
       databaseId: Constants.databaseId,
       collectionId: Constants.usersCollectionId,
       documentId: user.$id,
-      data: {'userID': user.$id},
+      data: {'userID': user.$id, 'username': username},
     );
-    // Remove any existing anonymous session
-    try {
-      await account.deleteSession(sessionId: 'current');
-    } catch (e) {
-      Logger().w('No current session to delete: $e');
-    }
-    await account.createEmailPasswordSession(email: email, password: password);
     Logger().i('Account created for user: ${user.name}');
     return user;
   } catch (e) {

@@ -38,6 +38,7 @@ class _HomePageState extends State<HomePage> {
                 Enjoy!
                 PS: Please report any bugs you find on the GitHub repository (there will definitely be some).
                 PS2: As this (still) is a demo, if you open another tab, you can play against yourself (or alone) to test the game.
+                PS3: For now, you will not receive a verification email.
                 ''', softWrap: true),
               actions: [
                 TextButton(

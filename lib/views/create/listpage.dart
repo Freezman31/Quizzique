@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizzique/logic/logic.dart';
 import 'package:quizzique/utils/utils.dart';
+import 'package:quizzique/views/loginpage.dart';
 import 'package:quizzique/views/play/waitingpage.dart';
 
 class ListPage extends StatefulWidget {
@@ -37,10 +38,21 @@ class _ListPageState extends State<ListPage> {
         title: const Text('My Quizzes'),
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: fetchQuizzes),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await Account(widget.client).deleteSessions();
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                LoginPage.route,
+                (route) => false,
+              );
+            },
+          ),
         ],
       ),
       body: quizzes.isEmpty
-          ? const Center(child: Text('No quizzes found (yet).'))
+          ? const Center(child: Text('No quizzes found. Create one!'))
           : ListView.builder(
               itemCount: quizzes.length,
               itemBuilder: (context, index) {

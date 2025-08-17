@@ -15,10 +15,11 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool signingIn = true;
-  String username = '';
-  String email = '';
-  String password = '';
-  String confirmPassword = '';
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final MediaQueryData mq = MediaQuery.of(context);
@@ -60,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
                   maxLength: 32,
                   maxLines: 1,
                   textCapitalization: TextCapitalization.words,
-                  onChanged: (value) => username = value,
+                  controller: usernameController,
                   decoration: InputDecoration(
                     labelText: 'Username',
                     border: OutlineInputBorder(
@@ -84,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
-                onChanged: (value) => email = value,
+                controller: emailController,
               ),
             ),
           ),
@@ -95,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
                 autocorrect: false,
                 obscureText: true,
                 keyboardType: TextInputType.visiblePassword,
-                onChanged: (value) => password = value,
+                controller: passwordController,
                 autofillHints: const [AutofillHints.password],
                 decoration: InputDecoration(
                   labelText: 'Password',
@@ -121,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
-                  onChanged: (value) => confirmPassword = value,
+                  controller: confirmPasswordController,
                 ),
               ),
             ),
@@ -136,16 +137,19 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 onPressed: () async {
-                  if (password.isEmpty ||
-                      email.isEmpty ||
-                      (signingIn ? false : username.isEmpty) ||
-                      (signingIn ? false : confirmPassword.isEmpty)) {
+                  if (passwordController.text.isEmpty ||
+                      emailController.text.isEmpty ||
+                      (signingIn ? false : usernameController.text.isEmpty) ||
+                      (signingIn
+                          ? false
+                          : confirmPasswordController.text.isEmpty)) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Please fill all fields')),
                     );
                     return;
                   }
-                  if (password.length < 8 || password.length > 256) {
+                  if (passwordController.text.length < 8 ||
+                      passwordController.text.length > 256) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
@@ -155,7 +159,7 @@ class _LoginPageState extends State<LoginPage> {
                     );
                     return;
                   }
-                  if (!isEmailValid(email)) {
+                  if (!isEmailValid(emailController.text)) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Invalid email address')),
                     );
@@ -164,8 +168,8 @@ class _LoginPageState extends State<LoginPage> {
                   if (signingIn) {
                     try {
                       await login(
-                        email: email,
-                        password: password,
+                        email: emailController.text,
+                        password: passwordController.text,
                         client: widget.client,
                       );
                       Navigator.of(context).pushNamed(ListPage.route);
@@ -175,21 +179,64 @@ class _LoginPageState extends State<LoginPage> {
                       ).showSnackBar(SnackBar(content: Text('Error: $e')));
                     }
                   } else {
-                    if (password != confirmPassword) {
+                    if (passwordController.text !=
+                        confirmPasswordController.text) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Passwords do not match')),
                       );
                       return;
                     }
                     try {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Creating account...'),
+                            content: SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.2,
+                              height: MediaQuery.of(context).size.height * 0.1,
+                              child: AspectRatio(
+                                aspectRatio: 1,
+                                child: const CircularProgressIndicator(),
+                              ),
+                            ),
+                          );
+                        },
+                      );
                       await createAccount(
-                        username: username,
-                        email: email,
-                        password: password,
+                        username: usernameController.text,
+                        email: emailController.text,
+                        password: passwordController.text,
                         client: widget.client,
                         context: context,
                       );
+                      Navigator.of(context).pop();
+                      await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Account created'),
+                          content: const Text(
+                            'Your account has been created successfully. You can now log in.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        ),
+                      );
+                      setState(() {
+                        signingIn = true;
+                        usernameController.clear();
+                        emailController.clear();
+                        passwordController.clear();
+                        confirmPasswordController.clear();
+                      });
                     } on Exception catch (e) {
+                      Navigator.of(context).pop();
                       ScaffoldMessenger.of(
                         context,
                       ).showSnackBar(SnackBar(content: Text('Error: $e')));
