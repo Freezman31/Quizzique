@@ -364,7 +364,10 @@ Future<User> login({
   Account account = Account(client);
   await account.deleteSessions();
   try {
+    Logger().i('Creating session for user: $email');
     await account.createEmailPasswordSession(email: email, password: password);
+    Logger().i('Session created for user: $email');
+    await Future.delayed(Duration(milliseconds: 100));
     final user = await account.get();
     Logger().i('User logged in: ${user.name}');
     return user;
