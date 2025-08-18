@@ -62,12 +62,13 @@ class _FinalPodiumPageState extends State<FinalPodiumPage> {
                           children: [
                             Text(
                               podium[1].playerName,
-                              style: Theme.of(context).textTheme.headlineLarge,
+                              style: Theme.of(context).textTheme.headlineLarge
+                                  ?.copyWith(color: Colors.black),
                             ),
                             const SizedBox(height: 10),
                             Text(
                               podium[1].score.toString(),
-                              style: Theme.of(context).textTheme.headlineMedium,
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.black),
                             ),
                           ],
                         ),
@@ -80,12 +81,12 @@ class _FinalPodiumPageState extends State<FinalPodiumPage> {
                         children: [
                           Text(
                             podium[0].playerName,
-                            style: Theme.of(context).textTheme.headlineLarge,
+                            style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: Colors.black),
                           ),
                           const SizedBox(height: 10),
                           Text(
                             podium[0].score.toString(),
-                            style: Theme.of(context).textTheme.headlineMedium,
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.black),
                           ),
                         ],
                       ),
@@ -99,12 +100,12 @@ class _FinalPodiumPageState extends State<FinalPodiumPage> {
                           children: [
                             Text(
                               podium[2].playerName,
-                              style: Theme.of(context).textTheme.headlineLarge,
+                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: Colors.black),
                             ),
                             const SizedBox(height: 10),
                             Text(
                               podium[2].score.toString(),
-                              style: Theme.of(context).textTheme.headlineMedium,
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.black),
                             ),
                           ],
                         ),

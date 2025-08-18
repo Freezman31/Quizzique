@@ -53,17 +53,20 @@ class ScoreView extends StatelessWidget {
                 text: score.playerName,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
                 children: [
                   TextSpan(
                     text: '   -   ',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineSmall?.copyWith(color: Colors.black),
                   ),
                   TextSpan(
                     text: '${score.score} ${'point'.pluralize(score.score)}',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Theme.of(context).primaryColor,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineSmall?.copyWith(color: Colors.black),
                   ),
                 ],
               ),

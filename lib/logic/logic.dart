@@ -251,7 +251,19 @@ Future<List<Score>> getScores({
     queries: [Query.equal('game', gameID), Query.orderDesc('score')],
   );
 
-  return scores.documents.map<Score>((doc) {
+  final List<Map<String, dynamic>> players =
+      ((await databases.getDocument(
+                databaseId: Constants.databaseId,
+                collectionId: Constants.gamesCollectionId,
+                documentId: gameID,
+              )).data['players']
+              as List<dynamic>)
+          .map((e) => jsonDecode(e.toString()) as Map<String, dynamic>)
+          .toList();
+
+  Logger().i('Players in game $gameID: $players');
+
+  final nonNull = scores.documents.map<Score>((doc) {
     final data = doc.data;
     return Score(
       playerID: data['playerID'],
@@ -259,6 +271,19 @@ Future<List<Score>> getScores({
       playerName: data['playerName'],
     );
   }).toList();
+
+  final nullPlayers = players
+      .where(
+        (player) => !nonNull.any((score) => score.playerID == player['id']),
+      )
+      .toList();
+  nonNull.addAll(
+    nullPlayers.map(
+      (player) =>
+          Score(playerID: player['id'], score: 0, playerName: player['name']),
+    ),
+  );
+  return nonNull;
 }
 
 Future<Score> getPlayerScore({

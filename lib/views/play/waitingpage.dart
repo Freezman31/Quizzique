@@ -140,7 +140,7 @@ class _WaitingPageState extends State<WaitingPage> {
                             height: size,
                             child: QrImageView(
                               data:
-                                  '${Constants.url}:${Constants.port}/play/customization?code=${gameCode.toString()}',
+                                  '${Constants.url}${Constants.port != '' ? ':${Constants.port}' : ''}/play/customization?code=${gameCode.toString()}',
                               version: QrVersions.auto,
                               padding: EdgeInsets.zero,
                               eyeStyle: QrEyeStyle(

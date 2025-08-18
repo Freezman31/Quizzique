@@ -115,7 +115,7 @@ class _PlayPageState extends State<PlayPage> {
                           context: context,
                           response: await q.answer(
                             client: widget.client,
-                            answerIndex: 1,
+                            answerIndex: 0,
                             playerName: username,
                           ),
                         );
@@ -135,7 +135,7 @@ class _PlayPageState extends State<PlayPage> {
                           context: context,
                           response: await q.answer(
                             client: widget.client,
-                            answerIndex: 2,
+                            answerIndex: 1,
                             playerName: username,
                           ),
                         );
@@ -162,7 +162,7 @@ class _PlayPageState extends State<PlayPage> {
                           context: context,
                           response: await q.answer(
                             client: widget.client,
-                            answerIndex: 3,
+                            answerIndex: 2,
                             playerName: username,
                           ),
                         );
@@ -182,7 +182,7 @@ class _PlayPageState extends State<PlayPage> {
                           q: q,
                           response: await q.answer(
                             client: widget.client,
-                            answerIndex: 4,
+                            answerIndex: 3,
                             playerName: username,
                           ),
                         );
