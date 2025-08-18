@@ -362,6 +362,15 @@ Future<User> login({
   required Client client,
 }) async {
   Account account = Account(client);
+  try {
+    final user = await account.get();
+    if (user.email == email) {
+      Logger().i('User already connected: ${user.name}');
+      return user;
+    }
+  } catch (_) {
+    Logger().i('User not logged in');
+  }
   await account.deleteSessions();
   try {
     Logger().i('Creating session for user: $email');
