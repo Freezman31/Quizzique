@@ -239,8 +239,10 @@ class _PlayPageState extends State<PlayPage> {
         if (!ModalRoute.of(context)!.isCurrent) {
           Navigator.pop(context);
         }
+      }).then((_) {
+        lastUpdate = DateTime.now();
+        print(lastUpdate);
       });
-      lastUpdate = DateTime.now();
     }
   }
 }
@@ -285,6 +287,7 @@ void answerResult({
   required Question q,
   required DateTime? lastUpdate,
 }) {
+  print(lastUpdate);
   Future.delayed(
     Duration(
       milliseconds: max(

@@ -40,6 +40,7 @@ class _CodePageState extends State<CodePage> {
             ),
             autocorrect: false,
             keyboardType: TextInputType.number,
+            controller: _codeController,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(6),

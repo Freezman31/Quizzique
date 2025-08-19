@@ -348,14 +348,9 @@ Future<User> createAccount({
   Account account = Account(client);
   Databases databases = Databases(client);
   try {
-    final User user = await account.create(
-      userId: ID.unique(),
-      email: email,
-      password: password,
-      name: username,
-    );
-    await account.deleteSessions();
-    await account.createEmailPasswordSession(email: email, password: password);
+    final User user = await account.get();
+    await account.updateEmail(email: email, password: password);
+    await account.updateName(name: username);
     // Create a document in the users collection
     await databases.createDocument(
       databaseId: Constants.databaseId,
@@ -388,34 +383,35 @@ Future<User> login({
 }) async {
   Account account = Account(client);
   try {
-    final user = await account.get();
-    if (user.email == email) {
-      Logger().i('User already connected: ${user.name}');
-      return user;
-    }
+    await account.get();
+    await account.deleteSessions(); // Delete session only if there is
   } catch (_) {
     Logger().i('User not logged in');
   }
-  await account.deleteSessions();
+  try {
+    await account.createEmailPasswordSession(email: email, password: password);
+  } catch (e) {
+    Logger().i('Error logging in: $e');
+    if (e is AppwriteException) {
+      if (e.code == 401 && e.type != 'general_unauthorized_scope') {
+        throw Exception('Invalid email or password');
+      } else if (e.type != 'general_unauthorized_scope') {
+        throw Exception('Failed to log in: $e');
+      }
+    } else {
+      throw Exception('Failed to log in: $e');
+    }
+  }
   try {
     Logger().i('Creating session for user: $email');
-    await account.createEmailPasswordSession(email: email, password: password);
     Logger().i('Session created for user: $email');
     await Future.delayed(Duration(milliseconds: 100));
     final user = await account.get();
     Logger().i('User logged in: ${user.name}');
     return user;
   } catch (e) {
-    Logger().e('Error logging in: $e');
-    if (e is AppwriteException) {
-      if (e.code == 401) {
-        throw Exception('Invalid email or password');
-      } else {
-        throw Exception('Failed to log in: ${e.message}');
-      }
-    } else {
-      throw Exception('Failed to log in: $e');
-    }
+    Logger().i('Errdfdsfdsfdsf: $e');
+    rethrow;
   }
 }
 
