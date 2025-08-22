@@ -26,6 +26,7 @@ Future main(final dynamic context) async {
     final String gameId = payload['games']['\$id'];
     final DateTime startTime = DateTime.parse(payload['games']['\$updatedAt']);
     final DateTime submitTime = DateTime.parse(payload['\$updatedAt']);
+    final QuestionType questionType = QuestionType.values[payload['t']];
     final Duration timeAllowed = Duration(
         seconds:
             jsonDecode(payload['games']['currentQuestion'])['timeAllowed'] ??
@@ -60,14 +61,22 @@ Future main(final dynamic context) async {
       context.error('Question not found for ID: $questionId');
       return context.res.send('Question not found', 404);
     }
-    final int correctAnswer = jsonDecode(question)['c'];
+    final questionPayload = jsonDecode(question);
+    final int correctAnswer = questionPayload['c'];
     context.log('Correct answer: $correctAnswer');
     context.log('User answer: $userAnswer');
-
-    final bool isCorrect = userAnswer == correctAnswer;
+    bool isCorrect;
     final int timeTaken = submitTime.difference(startTime).inSeconds - 3;
-    final int score =
-        (1000 * (1 - (timeTaken / 2) / timeAllowed.inSeconds)).ceil();
+    int score;
+    if (questionType == QuestionType.guess) {
+      final int range = int.parse(questionPayload['answers']['3'].toString());
+      isCorrect = (userAnswer - correctAnswer).abs() <= range;
+      score = (1000 * (1 - (timeTaken / 2) / timeAllowed.inSeconds)).ceil() *
+          ((range - (userAnswer - correctAnswer).abs() * .5) / range).ceil();
+    } else {
+      isCorrect = userAnswer == correctAnswer;
+      score = (1000 * (1 - (timeTaken / 2) / timeAllowed.inSeconds)).ceil();
+    }
     if (timeTaken > timeAllowed.inSeconds) {
       context.log(
           'Time taken exceeds allowed time: $timeTaken seconds, whereas allowed is ${timeAllowed.inSeconds} seconds');
@@ -181,4 +190,10 @@ String? getQuestion({
 }) {
   return (payload['games']['quiz']['questions'] as List<dynamic>)
       .firstWhere((q) => jsonDecode(q)['id'] == questionId, orElse: () => null);
+}
+
+enum QuestionType {
+  fourChoices,
+  twoChoices,
+  guess,
 }
