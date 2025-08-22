@@ -4,7 +4,9 @@ import 'package:quizzique/logic/logic.dart';
 import 'package:quizzique/views/play/finalpodiumpage.dart';
 import 'package:quizzique/views/play/podiumpage.dart';
 import 'package:quizzique/widgets/countdown.dart';
-import 'package:quizzique/widgets/quiz_button.dart';
+import 'package:quizzique/widgets/question_types_edit/four_options.dart';
+import 'package:quizzique/widgets/question_types_edit/guess.dart';
+import 'package:quizzique/widgets/question_types_edit/two_options.dart';
 
 class PresentPage extends StatefulWidget {
   static const String route = '/play/present';
@@ -64,63 +66,23 @@ class _PresentPageState extends State<PresentPage> {
             const SizedBox(height: 20),
             Expanded(
               flex: 3,
-              child: Column(
-                children: [
-                  Expanded(
-                    flex: 10,
-                    child: Row(
-                      children: [
-                        Spacer(),
-                        Expanded(
-                          flex: 10,
-                          child: QuizButton(
-                            onPressed: () {},
-                            label: q.answers[0],
-                            symbol: Symbols.square,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          flex: 10,
-                          child: QuizButton(
-                            onPressed: () {},
-                            label: q.answers[1],
-                            symbol: Symbols.circle,
-                          ),
-                        ),
-                        Spacer(),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    flex: 10,
-                    child: Row(
-                      children: [
-                        Spacer(),
-                        Expanded(
-                          flex: 10,
-                          child: QuizButton(
-                            onPressed: () {},
-                            label: q.answers[2],
-                            symbol: Symbols.triangle,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          flex: 10,
-                          child: QuizButton(
-                            onPressed: () {},
-                            label: q.answers[3],
-                            symbol: Symbols.diamond,
-                          ),
-                        ),
-                        Spacer(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              child: switch (q.type) {
+                QuestionType.fourChoices => FourOptions(
+                  buttonHeight: MediaQuery.of(context).size.height * 0.1,
+                  currentQuestion: q,
+                  editMode: false,
+                ),
+                QuestionType.twoChoices => TwoOptions(
+                  buttonHeight: MediaQuery.of(context).size.height * 0.1,
+                  currentQuestion: q,
+                  editMode: false,
+                ),
+                QuestionType.guess => Guess(
+                  buttonHeight: MediaQuery.of(context).size.height * 0.1,
+                  currentQuestion: q,
+                  editMode: false,
+                ),
+              },
             ),
             const SizedBox(height: 20),
           ],

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:quizzique/logic/logic.dart';
 import 'package:quizzique/utils/constants.dart';
@@ -24,6 +25,9 @@ class _PlayPageState extends State<PlayPage> {
   Realtime? realtime;
   DateTime? lastUpdate;
   String username = '';
+  late int value = q.type == QuestionType.guess
+      ? (int.parse(q.answers[0]) + int.parse(q.answers[1]) ~/ 2)
+      : 0;
   @override
   Widget build(BuildContext context) {
     final arguments =
@@ -101,99 +105,35 @@ class _PlayPageState extends State<PlayPage> {
                 ),
               ),
             ),
-            Expanded(
-              flex: 3,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: QuizButton(
-                      onPressed: () async {
-                        loading(context: context);
-                        answerResult(
-                          lastUpdate: lastUpdate,
-                          q: q,
-                          context: context,
-                          response: await q.answer(
-                            client: widget.client,
-                            answerIndex: 0,
-                            playerName: username,
-                          ),
-                        );
-                      },
-                      label: '',
-                      symbol: Symbols.square,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: QuizButton(
-                      onPressed: () async {
-                        loading(context: context);
-                        answerResult(
-                          lastUpdate: lastUpdate,
-                          q: q,
-                          context: context,
-                          response: await q.answer(
-                            client: widget.client,
-                            answerIndex: 1,
-                            playerName: username,
-                          ),
-                        );
-                      },
-                      label: '',
-                      symbol: Symbols.circle,
-                    ),
-                  ),
-                ],
+            ...switch (q.type) {
+              QuestionType.fourChoices => fourOptions(
+                context: context,
+                q: q,
+                client: widget.client,
+                username: username,
+                lastUpdate: lastUpdate,
               ),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              flex: 3,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: QuizButton(
-                      onPressed: () async {
-                        loading(context: context);
-                        answerResult(
-                          lastUpdate: lastUpdate,
-                          q: q,
-                          context: context,
-                          response: await q.answer(
-                            client: widget.client,
-                            answerIndex: 2,
-                            playerName: username,
-                          ),
-                        );
-                      },
-                      label: '',
-                      symbol: Symbols.triangle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: QuizButton(
-                      onPressed: () async {
-                        loading(context: context);
-                        answerResult(
-                          context: context,
-                          lastUpdate: lastUpdate,
-                          q: q,
-                          response: await q.answer(
-                            client: widget.client,
-                            answerIndex: 3,
-                            playerName: username,
-                          ),
-                        );
-                      },
-                      label: '',
-                      symbol: Symbols.diamond,
-                    ),
-                  ),
-                ],
+              QuestionType.twoChoices => twoOptions(
+                context: context,
+                q: q,
+                client: widget.client,
+                username: username,
+                lastUpdate: lastUpdate,
               ),
-            ),
+              QuestionType.guess => guess(
+                context: context,
+                q: q,
+                client: widget.client,
+                username: username,
+                lastUpdate: lastUpdate,
+                value: value,
+                valueUpdate: (newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              ),
+            },
           ],
         ),
       ),
@@ -241,7 +181,6 @@ class _PlayPageState extends State<PlayPage> {
         }
       }).then((_) {
         lastUpdate = DateTime.now();
-        print(lastUpdate);
       });
     }
   }
@@ -287,7 +226,6 @@ void answerResult({
   required Question q,
   required DateTime? lastUpdate,
 }) {
-  print(lastUpdate);
   Future.delayed(
     Duration(
       milliseconds: max(
@@ -415,4 +353,272 @@ void result({
       );
     },
   );
+}
+
+List<Widget> fourOptions({
+  required BuildContext context,
+  required Question q,
+  required Client client,
+  required String username,
+  required DateTime? lastUpdate,
+}) {
+  return [
+    Expanded(
+      flex: 3,
+      child: Row(
+        children: [
+          Expanded(
+            child: QuizButton(
+              onPressed: () async {
+                loading(context: context);
+                answerResult(
+                  lastUpdate: lastUpdate,
+                  q: q,
+                  context: context,
+                  response: await q.answer(
+                    client: client,
+                    answerIndex: 0,
+                    playerName: username,
+                  ),
+                );
+              },
+              label: '',
+              symbol: Symbols.square,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: QuizButton(
+              onPressed: () async {
+                loading(context: context);
+                answerResult(
+                  lastUpdate: lastUpdate,
+                  q: q,
+                  context: context,
+                  response: await q.answer(
+                    client: client,
+                    answerIndex: 1,
+                    playerName: username,
+                  ),
+                );
+              },
+              label: '',
+              symbol: Symbols.circle,
+            ),
+          ),
+        ],
+      ),
+    ),
+    const SizedBox(height: 10),
+    Expanded(
+      flex: 3,
+      child: Row(
+        children: [
+          Expanded(
+            child: QuizButton(
+              onPressed: () async {
+                loading(context: context);
+                answerResult(
+                  lastUpdate: lastUpdate,
+                  q: q,
+                  context: context,
+                  response: await q.answer(
+                    client: client,
+                    answerIndex: 2,
+                    playerName: username,
+                  ),
+                );
+              },
+              label: '',
+              symbol: Symbols.triangle,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: QuizButton(
+              onPressed: () async {
+                loading(context: context);
+                answerResult(
+                  context: context,
+                  lastUpdate: lastUpdate,
+                  q: q,
+                  response: await q.answer(
+                    client: client,
+                    answerIndex: 3,
+                    playerName: username,
+                  ),
+                );
+              },
+              label: '',
+              symbol: Symbols.diamond,
+            ),
+          ),
+        ],
+      ),
+    ),
+  ];
+}
+
+List<Widget> twoOptions({
+  required BuildContext context,
+  required Question q,
+  required Client client,
+  required String username,
+  required DateTime? lastUpdate,
+}) {
+  return [
+    Expanded(
+      flex: 3,
+      child: Row(
+        children: [
+          Expanded(
+            child: QuizButton(
+              onPressed: () async {
+                loading(context: context);
+                answerResult(
+                  lastUpdate: lastUpdate,
+                  q: q,
+                  context: context,
+                  response: await q.answer(
+                    client: client,
+                    answerIndex: 0,
+                    playerName: username,
+                  ),
+                );
+              },
+              label: '',
+              symbol: Symbols.square,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: QuizButton(
+              onPressed: () async {
+                loading(context: context);
+                answerResult(
+                  lastUpdate: lastUpdate,
+                  q: q,
+                  context: context,
+                  response: await q.answer(
+                    client: client,
+                    answerIndex: 1,
+                    playerName: username,
+                  ),
+                );
+              },
+              label: '',
+              symbol: Symbols.circle,
+            ),
+          ),
+        ],
+      ),
+    ),
+  ];
+}
+
+List<Widget> guess({
+  required BuildContext context,
+  required Question q,
+  required Client client,
+  required String username,
+  required DateTime? lastUpdate,
+  required Function(int) valueUpdate,
+  required int value,
+}) {
+  final theme = Theme.of(context);
+  final TextEditingController valueController = TextEditingController(
+    text: value.toString(),
+  );
+  return [
+    Expanded(
+      child: SliderTheme(
+        data: SliderTheme.of(context).copyWith(
+          trackShape: RoundedRectSliderTrackShape(),
+          trackHeight: 4.0,
+          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
+          overlayShape: RoundSliderOverlayShape(overlayRadius: 28.0),
+          tickMarkShape: RoundSliderTickMarkShape(),
+          activeTrackColor: theme.colorScheme.secondary.withAlpha(200),
+          valueIndicatorShape: DropSliderValueIndicatorShape(),
+          valueIndicatorTextStyle: theme.textTheme.labelLarge!.copyWith(
+            color: theme.colorScheme.onSecondary,
+            fontWeight: FontWeight.bold,
+          ),
+          showValueIndicator: ShowValueIndicator.alwaysVisible,
+        ),
+        child: Slider(
+          value: value.toDouble(),
+          min: double.parse(q.answers[0]),
+          max: double.parse(q.answers[1]),
+          label: '${value.toInt()}',
+          onChanged: (newValue) {
+            valueUpdate(newValue.toInt());
+          },
+        ),
+      ),
+    ),
+    SizedBox(height: 20),
+    Expanded(
+      child: TextFormField(
+        decoration: InputDecoration(
+          labelText: 'Answer',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+          counterText: '',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        controller: valueController,
+        onTap: () {
+          valueController.selection = TextSelection.fromPosition(
+            TextPosition(offset: valueController.text.length),
+          );
+        },
+        onChanged: (value) {
+          if (int.parse(value) > int.parse(q.answers[1])) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Value must be less than max.'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+            valueController.text = (int.parse(q.answers[1])).toString();
+            valueController.selection = TextSelection.fromPosition(
+              TextPosition(offset: valueController.text.length),
+            );
+          } else if (int.parse(value) < int.parse(q.answers[0])) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Value must be greater than min.'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+            valueController.text = (int.parse(q.answers[0])).toString();
+            valueController.selection = TextSelection.fromPosition(
+              TextPosition(offset: valueController.text.length),
+            );
+          }
+          valueUpdate(int.parse(valueController.text));
+        },
+      ),
+    ),
+    SizedBox(height: 20),
+    Expanded(
+      child: ElevatedButton(
+        onPressed: () async {
+          loading(context: context);
+          answerResult(
+            lastUpdate: lastUpdate,
+            q: q,
+            context: context,
+            response: await q.answer(
+              client: client,
+              answerIndex: value,
+              playerName: username,
+            ),
+          );
+        },
+        child: Text('Submit!'),
+      ),
+    ),
+  ];
 }

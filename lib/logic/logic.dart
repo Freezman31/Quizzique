@@ -64,6 +64,7 @@ Future<Question> getCurrentQuestion({
           duration: payload['d'] as int,
           durationBeforeAnswer:
               document.data['quiz']['durationBeforeAnswer'] as int,
+          type: QuestionType.values[payload['t'] as int],
         );
       })
       .catchError((error) {
@@ -103,6 +104,7 @@ Future<void> goToNextQuestion({
           nextQuestion['4'],
         ],
         'd': nextQuestion['d'],
+        't': nextQuestion['t'],
       }),
     },
   );
@@ -117,6 +119,7 @@ class Question {
   int questionIndex;
   int duration;
   int durationBeforeAnswer;
+  QuestionType type;
 
   Question({
     required this.gameID,
@@ -127,6 +130,7 @@ class Question {
     required this.duration,
     required this.questionIndex,
     required this.durationBeforeAnswer,
+    required this.type,
   });
   Question.empty()
     : gameID = '',
@@ -136,7 +140,8 @@ class Question {
       correctAnswerIndex = 0,
       questionIndex = 0,
       durationBeforeAnswer = 0,
-      duration = 30;
+      duration = 30,
+      type = QuestionType.fourChoices;
 
   @override
   bool operator ==(Object other) {
@@ -146,7 +151,8 @@ class Question {
     return gameID == otherQuestion.gameID &&
         question == otherQuestion.question &&
         listEquals(answers, otherQuestion.answers) &&
-        correctAnswerIndex == otherQuestion.correctAnswerIndex;
+        correctAnswerIndex == otherQuestion.correctAnswerIndex &&
+        type == otherQuestion.type;
   }
 
   @override
@@ -154,7 +160,8 @@ class Question {
     return gameID.hashCode ^
         question.hashCode ^
         answers.hashCode ^
-        (correctAnswerIndex?.hashCode ?? 0);
+        (correctAnswerIndex?.hashCode ?? 0) ^
+        type.hashCode;
   }
 
   Future<AnswerResponse> answer({
@@ -162,9 +169,6 @@ class Question {
     required int answerIndex,
     required String playerName,
   }) async {
-    if (answerIndex < 0 || answerIndex >= answers.length) {
-      throw Exception('Invalid answer index');
-    }
     Databases databases = Databases(client);
     Logger().i('Answering question $questionID with answer index $answerIndex');
     final id = ID.unique();
@@ -236,9 +240,12 @@ class Question {
       questionIndex: questionIndex,
       durationBeforeAnswer: durationBeforeAnswer,
       duration: duration,
+      type: type,
     );
   }
 }
+
+enum QuestionType { fourChoices, twoChoices, guess }
 
 Future<List<Score>> getScores({
   required Client client,
@@ -472,6 +479,7 @@ Future<GameCreationResponse> presentQuiz({
         'answers': ['', '', '', ''],
         'd': 0,
         'durationBeforeAnswer': 0,
+        't': 0,
       }),
       'code': code,
       'owner': (await Account(client).get()).$id,
@@ -619,6 +627,7 @@ class Quiz {
               correctAnswerIndex: q['c'] as int?,
               duration: q['d'] as int,
               durationBeforeAnswer: json['durationBeforeAnswer'] as int,
+              type: QuestionType.values[q['t'] as int],
             ),
           )
           .toList();
@@ -642,6 +651,7 @@ class Quiz {
           '4': q.answers[3],
           'c': q.correctAnswerIndex,
           'd': q.duration,
+          't': q.type.index,
         });
       }).toList(),
     };

@@ -8,7 +8,7 @@ const String collectionId = '685d148300346d2203a7';
 const String scoreId = '68953e9100224ddb0584';
 const String appwriteEndpoint = 'https://cloud.appwrite.io/v1';
 
-Future main(final context) async {
+Future main(final dynamic context) async {
   final Client client = Client()
       .setEndpoint(appwriteEndpoint)
       .setProject(Platform.environment['APPWRITE_FUNCTION_PROJECT_ID'])

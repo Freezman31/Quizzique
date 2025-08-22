@@ -2,7 +2,9 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quizzique/logic/logic.dart';
-import 'package:quizzique/widgets/quiz_button.dart';
+import 'package:quizzique/widgets/question_types_edit/four_options.dart';
+import 'package:quizzique/widgets/question_types_edit/guess.dart';
+import 'package:quizzique/widgets/question_types_edit/two_options.dart';
 
 class QuizEdit extends StatefulWidget {
   final Client client;
@@ -50,8 +52,8 @@ class _QuizEditState extends State<QuizEdit> {
     if (durationController.text != currentQuestion.duration.toString()) {
       durationController.text = currentQuestion.duration.toString();
     }
-
-    final double buttonHeight = (MediaQuery.of(context).size.height * 0.2);
+    final MediaQueryData mq = MediaQuery.of(context);
+    final double buttonHeight = (mq.size.height * 0.2);
     final ScrollController scrollController = ScrollController();
 
     return Row(
@@ -205,6 +207,7 @@ class _QuizEditState extends State<QuizEdit> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
+                    counterText: '',
                   ),
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -218,113 +221,69 @@ class _QuizEditState extends State<QuizEdit> {
                   },
                 ),
               ),
-              const SizedBox(height: 16),
-              Expanded(
-                flex: 3,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: buttonHeight,
-                            child: QuizButton(
-                              onPressed: () {
-                                setState(() {
-                                  currentQuestion.correctAnswerIndex = 0;
-                                });
-                              },
-                              isCorrect:
-                                  currentQuestion.correctAnswerIndex == 0,
-                              label: currentQuestion.answers[0],
-                              symbol: Symbols.square,
-                              isEditable: true,
-                              onFieldSubmitted: (value) {
-                                setState(() {
-                                  currentQuestion.answers[0] = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: SizedBox(
-                            height: buttonHeight,
-                            child: QuizButton(
-                              onPressed: () {
-                                setState(() {
-                                  currentQuestion.correctAnswerIndex = 1;
-                                });
-                              },
-                              isCorrect:
-                                  currentQuestion.correctAnswerIndex == 1,
-                              label: currentQuestion.answers[1],
-                              symbol: Symbols.circle,
-                              isEditable: true,
-                              onFieldSubmitted: (value) {
-                                setState(() {
-                                  currentQuestion.answers[1] = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                    width: 1,
+                  ),
+                ),
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 1.0),
+                child: DropdownButton(
+                  menuWidth: mq.size.width * 0.7,
+                  items: [
+                    DropdownMenuItem(
+                      value: QuestionType.fourChoices,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 2.0),
+                        child: Text('Four Choices'),
+                      ),
                     ),
-                    SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: buttonHeight,
-                            child: QuizButton(
-                              onPressed: () {
-                                setState(() {
-                                  currentQuestion.correctAnswerIndex = 2;
-                                });
-                              },
-                              isCorrect:
-                                  currentQuestion.correctAnswerIndex == 2,
-                              label: currentQuestion.answers[2],
-                              symbol: Symbols.triangle,
-                              isEditable: true,
-                              onFieldSubmitted: (value) {
-                                setState(() {
-                                  currentQuestion.answers[2] = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: SizedBox(
-                            height: buttonHeight,
-                            child: QuizButton(
-                              onPressed: () {
-                                setState(() {
-                                  currentQuestion.correctAnswerIndex = 3;
-                                });
-                              },
-                              isCorrect:
-                                  currentQuestion.correctAnswerIndex == 3,
-                              label: currentQuestion.answers[3],
-                              symbol: Symbols.diamond,
-                              isEditable: true,
-                              onFieldSubmitted: (value) {
-                                setState(() {
-                                  currentQuestion.answers[3] = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
+                    DropdownMenuItem(
+                      value: QuestionType.twoChoices,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 2.0),
+                        child: Text('Two Choices'),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: QuestionType.guess,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 2.0),
+                        child: Text('Guess'),
+                      ),
                     ),
                   ],
+                  onChanged: (element) {
+                    currentQuestion.type = element!;
+                  },
+                  value: currentQuestion.type,
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                flex: 3,
+                child: switch (currentQuestion.type) {
+                  QuestionType.fourChoices => FourOptions(
+                    buttonHeight: buttonHeight,
+                    currentQuestion: currentQuestion,
+                    editMode: true,
+                  ),
+                  QuestionType.twoChoices => TwoOptions(
+                    buttonHeight: buttonHeight,
+                    currentQuestion: currentQuestion,
+                    editMode: true,
+                  ),
+                  QuestionType.guess => Guess(
+                    buttonHeight: buttonHeight,
+                    currentQuestion: currentQuestion,
+                    editMode: true,
+                  ),
+                },
               ),
             ],
           ),
