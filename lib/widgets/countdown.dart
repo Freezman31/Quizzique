@@ -56,7 +56,7 @@ class _CountdownState extends State<Countdown> {
           child: CircularProgressIndicator(
             value: progress,
             color: progress <= 1
-                ? Theme.of(context).primaryColor
+                ? Theme.of(context).colorScheme.onPrimary
                 : Theme.of(context).colorScheme.error,
             strokeWidth: mq.size.height * 0.02,
           ),
