@@ -208,7 +208,9 @@ class Question {
         } else if (res.responseStatusCode == 408) {
           return AnswerResponse(score: 0, status: AnswerStatus.tooLate);
         } else if (res.responseStatusCode == 500) {
-          continue;
+          //if (res.errors != '') break;
+          //continue;
+          break;
         } else {
           databases.deleteDocument(
             databaseId: doc.$databaseId,
@@ -286,8 +288,11 @@ Future<List<Score>> getScores({
       .toList();
   nonNull.addAll(
     nullPlayers.map(
-      (player) =>
-          Score(playerID: player['id'], score: 0, playerName: player['name']),
+      (player) => Score(
+        playerID: player['id'],
+        score: 0,
+        playerName: player['username'],
+      ),
     ),
   );
   return nonNull;
@@ -391,7 +396,9 @@ Future<User> login({
   Account account = Account(client);
   try {
     await account.get();
-    await account.deleteSessions(); // Delete session only if there is
+    await account.deleteSession(
+      sessionId: 'current',
+    ); // Delete session only if there is
   } catch (_) {
     Logger().i('User not logged in');
   }
@@ -417,7 +424,7 @@ Future<User> login({
     Logger().i('User logged in: ${user.name}');
     return user;
   } catch (e) {
-    Logger().i('Errdfdsfdsfdsf: $e');
+    Logger().i('Error fetching user: $e');
     rethrow;
   }
 }
@@ -510,37 +517,42 @@ Future<void> addPlayer({
   required String username,
 }) async {
   Databases databases = Databases(client);
-  final user = await Account(client).get();
-  final playerData = {'id': user.$id, 'username': username};
-  databases
-      .listDocuments(
-        databaseId: Constants.databaseId,
-        collectionId: Constants.gamesCollectionId,
-        queries: [Query.equal('code', gameCode)],
-      )
-      .then((result) async {
-        if (result.total > 0) {
-          final gameID = result.documents.first.$id;
-          await databases.updateDocument(
-            databaseId: Constants.databaseId,
-            collectionId: Constants.gamesCollectionId,
-            documentId: gameID,
-            data: {
-              'players': [
-                ...((await databases.getDocument(
-                      databaseId: Constants.databaseId,
-                      collectionId: Constants.gamesCollectionId,
-                      documentId: gameID,
-                    )).data['players']
-                    as List<dynamic>),
-                jsonEncode(playerData),
-              ],
-            },
-          );
-        } else {
-          throw Exception('Game with code $gameCode not found');
-        }
-      });
+  Account account = Account(client);
+  String userID;
+  try {
+    userID = (await account.get()).$id;
+  } catch (e) {
+    final sess = await account.createAnonymousSession();
+    userID = sess.userId;
+  }
+
+  final playerData = {'id': userID, 'username': username};
+  final DocumentList docs = await databases.listDocuments(
+    databaseId: Constants.databaseId,
+    collectionId: Constants.gamesCollectionId,
+    queries: [Query.equal('code', gameCode)],
+  );
+  if (docs.total > 0) {
+    final gameID = docs.documents.first.$id;
+    await databases.updateDocument(
+      databaseId: Constants.databaseId,
+      collectionId: Constants.gamesCollectionId,
+      documentId: gameID,
+      data: {
+        'players': [
+          ...((await databases.getDocument(
+                databaseId: Constants.databaseId,
+                collectionId: Constants.gamesCollectionId,
+                documentId: gameID,
+              )).data['players']
+              as List<dynamic>),
+          jsonEncode(playerData),
+        ],
+      },
+    );
+  } else {
+    throw Exception('Game with code $gameCode not found');
+  }
 }
 
 Future<void> saveQuiz({required Client client, required Quiz quiz}) async {

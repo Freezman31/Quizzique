@@ -35,7 +35,9 @@ class _FourOptionsState extends State<FourOptions> {
                       widget.currentQuestion.correctAnswerIndex = 0;
                     });
                   },
-                  isCorrect: widget.currentQuestion.correctAnswerIndex == 0,
+                  isCorrect:
+                      widget.editMode &&
+                      widget.currentQuestion.correctAnswerIndex == 0,
                   label: widget.currentQuestion.answers[0],
                   symbol: Symbols.square,
                   isEditable: widget.editMode,
@@ -59,7 +61,9 @@ class _FourOptionsState extends State<FourOptions> {
                       widget.currentQuestion.correctAnswerIndex = 1;
                     });
                   },
-                  isCorrect: widget.currentQuestion.correctAnswerIndex == 1,
+                  isCorrect:
+                      widget.editMode &&
+                      widget.currentQuestion.correctAnswerIndex == 1,
                   label: widget.currentQuestion.answers[1],
                   symbol: Symbols.circle,
                   isEditable: widget.editMode,
@@ -87,7 +91,9 @@ class _FourOptionsState extends State<FourOptions> {
                       widget.currentQuestion.correctAnswerIndex = 2;
                     });
                   },
-                  isCorrect: widget.currentQuestion.correctAnswerIndex == 2,
+                  isCorrect:
+                      widget.editMode &&
+                      widget.currentQuestion.correctAnswerIndex == 2,
                   label: widget.currentQuestion.answers[2],
                   symbol: Symbols.triangle,
                   isEditable: widget.editMode,
@@ -111,7 +117,9 @@ class _FourOptionsState extends State<FourOptions> {
                       widget.currentQuestion.correctAnswerIndex = 3;
                     });
                   },
-                  isCorrect: widget.currentQuestion.correctAnswerIndex == 3,
+                  isCorrect:
+                      widget.editMode &&
+                      widget.currentQuestion.correctAnswerIndex == 3,
                   label: widget.currentQuestion.answers[3],
                   symbol: Symbols.diamond,
                   isEditable: widget.editMode,

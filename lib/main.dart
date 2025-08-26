@@ -68,7 +68,7 @@ void main() async {
   try {
     if (Constants.isDemo) {
       Logger().i('Creating anonymous session for demo mode');
-      await acc.deleteSessions();
+      await acc.deleteSession(sessionId: 'current');
       await acc.createAnonymousSession();
     } else {
       await acc.get();

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:quizzique/logic/logic.dart';
 import 'package:quizzique/utils/constants.dart';
@@ -23,6 +24,14 @@ class _WaitingPageState extends State<WaitingPage> {
   int gameCode = -1;
   Quiz quiz = Quiz.empty();
   List<String> players = [];
+  RealtimeSubscription? sub;
+
+  @override
+  void dispose() {
+    sub?.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final arguments =
@@ -33,30 +42,29 @@ class _WaitingPageState extends State<WaitingPage> {
       final newGameCode = arguments['gameCode'];
       final newQuiz = arguments['quiz'];
       getPlayers(client: widget.client, gameID: newGameID).then((value) {
-        Realtime realtime = Realtime(widget.client);
-        realtime
-            .subscribe([
-              'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.$newGameID',
-            ])
-            .stream
-            .listen((event) {
-              if (event.events.contains(
-                'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.$newGameID',
-              )) {
-                getPlayers(client: widget.client, gameID: newGameID).then((
-                  newValue,
-                ) {
-                  setState(() {
-                    players = newValue;
-                  });
-                });
-              }
-            });
         setState(() {
           gameID = newGameID ?? '';
           gameCode = newGameCode ?? -1;
           players = value;
           quiz = newQuiz ?? Quiz.empty();
+        });
+        Realtime realtime = Realtime(widget.client);
+        sub = realtime.subscribe([
+          'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.$newGameID',
+        ]);
+        sub!.stream.listen((event) {
+          Logger().i('Received event: $event, PAYLOAD: ${event.payload}');
+          if (event.events.contains(
+            'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.$newGameID',
+          )) {
+            getPlayers(client: widget.client, gameID: newGameID).then((
+              newValue,
+            ) {
+              setState(() {
+                players = newValue;
+              });
+            });
+          }
         });
       });
     }

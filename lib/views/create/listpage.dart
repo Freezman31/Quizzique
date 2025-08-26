@@ -41,7 +41,7 @@ class _ListPageState extends State<ListPage> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await Account(widget.client).deleteSessions();
+              await Account(widget.client).deleteSession(sessionId: 'current');
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 LoginPage.route,

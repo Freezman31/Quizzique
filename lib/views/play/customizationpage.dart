@@ -68,7 +68,7 @@ class _CustomizationPageState extends State<CustomizationPage> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  addPlayer(
+                  await addPlayer(
                     client: widget.client,
                     gameCode: code,
                     username: _username,

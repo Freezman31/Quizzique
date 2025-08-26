@@ -56,87 +56,147 @@ class _GuessState extends State<Guess> {
       );
     }
     final ThemeData theme = Theme.of(context);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackShape: RoundedRectSliderTrackShape(),
-            trackHeight: 4.0,
-            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
-            overlayShape: RoundSliderOverlayShape(overlayRadius: 28.0),
-            tickMarkShape: RoundSliderTickMarkShape(),
-            activeTrackColor: theme.colorScheme.secondary.withAlpha(200),
-            valueIndicatorShape: DropSliderValueIndicatorShape(),
-            valueIndicatorTextStyle: theme.textTheme.labelLarge!.copyWith(
-              color: theme.colorScheme.onSecondary,
-              fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackShape: RoundedRectSliderTrackShape(),
+              trackHeight: 4.0,
+              thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
+              overlayShape: RoundSliderOverlayShape(overlayRadius: 28.0),
+              tickMarkShape: RoundSliderTickMarkShape(),
+              activeTrackColor: theme.colorScheme.secondary.withAlpha(200),
+              valueIndicatorShape: DropSliderValueIndicatorShape(),
+              valueIndicatorTextStyle: theme.textTheme.labelLarge!.copyWith(
+                color: theme.colorScheme.onSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+              showValueIndicator: widget.editMode
+                  ? ShowValueIndicator.alwaysVisible
+                  : ShowValueIndicator.never,
             ),
-            showValueIndicator: widget.editMode
-                ? ShowValueIndicator.alwaysVisible
-                : ShowValueIndicator.never,
+            child: Slider(
+              value: widget.currentQuestion.correctAnswerIndex!.toDouble(),
+              min: double.parse(_minController.text),
+              max: double.parse(_maxController.text),
+              label: '${widget.currentQuestion.correctAnswerIndex}',
+              onChanged: (value) {
+                if (!widget.editMode) return;
+                setState(() {
+                  widget.currentQuestion.correctAnswerIndex = value.toInt();
+                });
+              },
+            ),
           ),
-          child: Slider(
-            value: widget.currentQuestion.correctAnswerIndex!.toDouble(),
-            min: double.parse(_minController.text),
-            max: double.parse(_maxController.text),
-            label: '${widget.currentQuestion.correctAnswerIndex}',
-            onChanged: (value) {
-              if (!widget.editMode) return;
-              setState(() {
-                widget.currentQuestion.correctAnswerIndex = value.toInt();
-              });
-            },
-          ),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: widget.editMode
-                  ? TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Min',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: widget.editMode
+                    ? TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Min',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          counterText: '',
                         ),
-                        counterText: '',
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      controller: _minController,
-                      onTap: () {
-                        _minController.selection = TextSelection.fromPosition(
-                          TextPosition(offset: _minController.text.length),
-                        );
-                      },
-                      onChanged: (value) {
-                        if (int.parse(value) >=
-                            int.parse(_maxController.text)) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Min must be less than max.'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                          _minController.text =
-                              (int.parse(_maxController.text) - 1).toString();
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        controller: _minController,
+                        onTap: () {
                           _minController.selection = TextSelection.fromPosition(
                             TextPosition(offset: _minController.text.length),
                           );
-                        }
-                        widget.currentQuestion.answers[0] = value;
-                      },
-                    )
-                  : Text('Min: ${widget.currentQuestion.answers[0]}'),
-            ),
-            const Spacer(flex: 5),
-            Expanded(
-              child: widget.editMode
-                  ? TextFormField(
+                        },
+                        onChanged: (value) {
+                          if (int.parse(value) >=
+                              int.parse(_maxController.text)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Min must be less than max.'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                            _minController.text =
+                                (int.parse(_maxController.text) - 1).toString();
+                            _minController
+                                .selection = TextSelection.fromPosition(
+                              TextPosition(offset: _minController.text.length),
+                            );
+                          }
+                          widget.currentQuestion.answers[0] = value;
+                        },
+                      )
+                    : Text(
+                        widget.currentQuestion.answers[0],
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+              ),
+              const Spacer(flex: 5),
+              Expanded(
+                child: widget.editMode
+                    ? TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Max',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          counterText: '',
+                        ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        controller: _maxController,
+                        onTap: () {
+                          // Move cursor to the end when tapped
+                          _maxController.selection = TextSelection.fromPosition(
+                            TextPosition(offset: _maxController.text.length),
+                          );
+                        },
+                        onChanged: (value) {
+                          if (int.parse(value) <=
+                              int.parse(_minController.text)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Max must be more than min.'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                            _maxController.text =
+                                (int.parse(_minController.text) + 1).toString();
+                            _maxController
+                                .selection = TextSelection.fromPosition(
+                              TextPosition(offset: _maxController.text.length),
+                            );
+                          }
+                          widget.currentQuestion.answers[1] = value;
+                        },
+                      )
+                    : Text(
+                        widget.currentQuestion.answers[1],
+                        style: Theme.of(context).textTheme.headlineMedium,
+                        textAlign: TextAlign.right,
+                      ),
+              ),
+            ],
+          ),
+          widget.editMode ? const SizedBox(height: 20) : SizedBox.shrink(),
+          widget.editMode
+              ? Center(
+                  child: Container(
+                    alignment: Alignment.center,
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    child: TextFormField(
                       decoration: InputDecoration(
-                        labelText: 'Max',
+                        labelText: 'Range (± for answer to be valid)',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
@@ -144,66 +204,22 @@ class _GuessState extends State<Guess> {
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      controller: _maxController,
+                      controller: _rangeController,
                       onTap: () {
                         // Move cursor to the end when tapped
-                        _maxController.selection = TextSelection.fromPosition(
-                          TextPosition(offset: _maxController.text.length),
+                        _rangeController.selection = TextSelection.fromPosition(
+                          TextPosition(offset: _rangeController.text.length),
                         );
                       },
                       onChanged: (value) {
-                        if (int.parse(value) <=
-                            int.parse(_minController.text)) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Max must be more than min.'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                          _maxController.text =
-                              (int.parse(_minController.text) + 1).toString();
-                          _maxController.selection = TextSelection.fromPosition(
-                            TextPosition(offset: _maxController.text.length),
-                          );
-                        }
-                        widget.currentQuestion.answers[1] = value;
+                        widget.currentQuestion.answers[2] = value;
                       },
-                    )
-                  : Text('Max: ${widget.currentQuestion.answers[1]}'),
-            ),
-          ],
-        ),
-        widget.editMode ? const SizedBox(height: 20) : SizedBox.shrink(),
-        widget.editMode
-            ? Center(
-                child: Container(
-                  alignment: Alignment.center,
-                  width: MediaQuery.of(context).size.width * 0.25,
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Range (± for answer to be valid)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      counterText: '',
                     ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    controller: _rangeController,
-                    onTap: () {
-                      // Move cursor to the end when tapped
-                      _rangeController.selection = TextSelection.fromPosition(
-                        TextPosition(offset: _rangeController.text.length),
-                      );
-                    },
-                    onChanged: (value) {
-                      widget.currentQuestion.answers[2] = value;
-                    },
                   ),
-                ),
-              )
-            : SizedBox.shrink(),
-      ],
+                )
+              : SizedBox.shrink(),
+        ],
+      ),
     );
   }
 }

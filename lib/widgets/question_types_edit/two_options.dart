@@ -33,7 +33,9 @@ class _TwoOptionsState extends State<TwoOptions> {
                   widget.currentQuestion.correctAnswerIndex = 0;
                 });
               },
-              isCorrect: widget.currentQuestion.correctAnswerIndex == 0,
+              isCorrect:
+                  widget.editMode &&
+                  widget.currentQuestion.correctAnswerIndex == 0,
               label: widget.currentQuestion.answers[0],
               symbol: Symbols.square,
               isEditable: widget.editMode,
@@ -57,7 +59,9 @@ class _TwoOptionsState extends State<TwoOptions> {
                   widget.currentQuestion.correctAnswerIndex = 1;
                 });
               },
-              isCorrect: widget.currentQuestion.correctAnswerIndex == 1,
+              isCorrect:
+                  widget.editMode &&
+                  widget.currentQuestion.correctAnswerIndex == 1,
               label: widget.currentQuestion.answers[1],
               symbol: Symbols.circle,
               isEditable: widget.editMode,

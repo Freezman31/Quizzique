@@ -25,9 +25,17 @@ class _PlayPageState extends State<PlayPage> {
   Realtime? realtime;
   DateTime? lastUpdate;
   String username = '';
+  late final RealtimeSubscription sub;
   late int value = q.type == QuestionType.guess
       ? (int.parse(q.answers[0]) + int.parse(q.answers[1]) ~/ 2)
       : 0;
+
+  @override
+  void dispose() {
+    sub.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final arguments =
@@ -41,47 +49,41 @@ class _PlayPageState extends State<PlayPage> {
       ).then((v) {
         Logger().i('Subscribing to question updates for game ID: ${v.gameID}');
 
-        realtime!
-            .subscribe([
-              'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
-            ])
-            .stream
-            .listen((event) {
-              if (event.events.contains(
-                    'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
-                  ) &&
-                  jsonDecode(event.payload['currentQuestion'])['id'] !=
-                      q.questionID &&
-                  jsonDecode(event.payload['currentQuestion'])['i'] !=
-                      q.questionIndex) {
-                Logger().i(
-                  'New question received: ${jsonDecode(event.payload['currentQuestion'])['id']},',
-                );
-                Logger().i('Current question ID: ${q.questionID}');
-                if (!ModalRoute.of(context)!.isCurrent) {
-                  Navigator.pop(context);
-                }
-                getCurrentQuestion(
-                  client: widget.client,
-                  code: arguments['code'] ?? 0,
-                ).then((v) {
-                  wait(false, v.durationBeforeAnswer);
-                  setState(() {
-                    q = v;
-                  });
-                });
-              } else if (event.events.contains(
-                    'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
-                  ) &&
-                  event.payload['ended'] == true) {
-                Logger().i('Game ended, navigating to results page.');
-                result(
-                  context: context,
-                  client: widget.client,
-                  gameID: v.gameID,
-                );
-              }
+        sub = realtime!.subscribe([
+          'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
+        ]);
+        sub.stream.listen((event) {
+          if (event.events.contains(
+                'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
+              ) &&
+              jsonDecode(event.payload['currentQuestion'])['id'] !=
+                  q.questionID &&
+              jsonDecode(event.payload['currentQuestion'])['i'] !=
+                  q.questionIndex) {
+            Logger().i(
+              'New question received: ${jsonDecode(event.payload['currentQuestion'])['id']},',
+            );
+            Logger().i('Current question ID: ${q.questionID}');
+            if (!ModalRoute.of(context)!.isCurrent) {
+              Navigator.pop(context);
+            }
+            getCurrentQuestion(
+              client: widget.client,
+              code: arguments['code'] ?? 0,
+            ).then((v) {
+              wait(false, v.durationBeforeAnswer);
+              setState(() {
+                q = v;
+              });
             });
+          } else if (event.events.contains(
+                'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
+              ) &&
+              event.payload['ended'] == true) {
+            Logger().i('Game ended, navigating to results page.');
+            result(context: context, client: widget.client, gameID: v.gameID);
+          }
+        });
         setState(() {
           username = arguments['username'] ?? '';
           wait(true, 0);
@@ -602,7 +604,8 @@ List<Widget> guess({
       ),
     ),
     SizedBox(height: 20),
-    Expanded(
+    SizedBox(
+      height: MediaQuery.of(context).size.height * 0.1,
       child: ElevatedButton(
         onPressed: () async {
           loading(context: context);
