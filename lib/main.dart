@@ -7,6 +7,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
 import 'package:quizzique/utils/constants.dart';
+import 'package:quizzique/views/create/account.dart';
 import 'package:quizzique/views/create/editpage.dart';
 import 'package:quizzique/views/create/listpage.dart';
 import 'package:quizzique/views/homepage.dart';
@@ -40,12 +41,12 @@ void main() async {
       appwriteUrl: dotenv.get('APPWRITE_URL'),
       appwriteProjectId: dotenv.get('APPWRITE_PROJECT_ID'),
       databaseId: dotenv.get('DATABASE_ID'),
-      usersCollectionId: dotenv.get('USERS_COLLECTION_ID'),
-      quizzesCollectionId: dotenv.get('QUIZZES_COLLECTION_ID'),
-      answersCollectionId: dotenv.get('ANSWERS_COLLECTION_ID'),
-      gamesCollectionId: dotenv.get('GAMES_COLLECTION_ID'),
+      usersTableId: dotenv.get('USERS_TABLE_ID'),
+      quizzesTableId: dotenv.get('QUIZZES_TABLE_ID'),
+      answersTableId: dotenv.get('ANSWERS_TABLE_ID'),
+      gamesTableId: dotenv.get('GAMES_TABLE_ID'),
       answerCheckFunctionId: dotenv.get('ANSWER_CHECK_FUNCTION_ID'),
-      scoresCollectionId: dotenv.get('SCORES_COLLECTION_ID'),
+      scoresTableId: dotenv.get('SCORES_TABLE_ID'),
       url: dotenv.get('URL'),
       port: dotenv.get('PORT', fallback: ''),
       isDemo: dotenv.getBool('DEMO', fallback: false),
@@ -117,6 +118,7 @@ class QuizApp extends StatelessWidget {
         EditPage.route: (context) => EditPage(client: client),
         CustomizationPage.route: (context) => CustomizationPage(client: client),
         FinalPodiumPage.route: (context) => FinalPodiumPage(client: client),
+        AccountPage.route: (context) => AccountPage(client: client),
       },
       onGenerateRoute: (settings) {
         final uri = Uri.parse(settings.name ?? '');

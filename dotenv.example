@@ -6,10 +6,10 @@ URL=https://your-hosting-url.com
 APPWRITE_URL=your_appwrite_url
 APPWRITE_PROJECT_ID=your_project_id
 DATABASE_ID=your_database_id
-USERS_COLLECTION_ID=your_users_collection_id
-QUIZZES_COLLECTION_ID=your_quizzes_collection_id
-ANSWERS_COLLECTION_ID=your_answers_collection_id
-GAMES_COLLECTION_ID=your_games_collection_id
-SCORES_COLLECTION_ID=your_score_collection_id
+USERS_TABLE_ID=your_users_table_id
+QUIZZES_TABLE_ID=your_quizzes_table_id
+ANSWERS_TABLE_ID=your_answers_table_id
+GAMES_TABLE_ID=your_games_table_id
+SCORES_TABLE_ID=your_score_table_id
 
 ANSWER_CHECK_FUNCTION_ID=your_answer_check_function_id

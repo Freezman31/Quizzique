@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:dart_appwrite/dart_appwrite.dart';
 
 const String databaseId = '6859582600031c46e49c';
-const String collectionId = '685d148300346d2203a7';
-const String scoreId = '68953e9100224ddb0584';
+const String answerTableId = '685d148300346d2203a7';
+const String scoreTableId = '68953e9100224ddb0584';
 
 Future main(final dynamic context) async {
   final Client client = Client()
@@ -13,7 +13,7 @@ Future main(final dynamic context) async {
       .setProject(Platform.environment['APPWRITE_FUNCTION_PROJECT_ID'])
       .setKey(context.req.headers['x-appwrite-key']);
 
-  final Databases databases = Databases(client);
+  final TablesDB tablesDB = TablesDB(client);
   final payload = jsonDecode(context.req.body.toString());
 
   try {
@@ -32,13 +32,13 @@ Future main(final dynamic context) async {
             jsonDecode(payload['games']['currentQuestion'])['timeAllowed'] ??
                 30); // Default to 30s
     final String? question = getQuestion(
-      databases: databases,
+      tablesDB: tablesDB,
       payload: payload,
       questionId: questionId,
       context: context,
     );
     final bool answerExists = await checkIfAnswerExists(
-      databases: databases,
+      tablesDB: tablesDB,
       answerId: answerId,
       playerId: playerId,
       questionId: questionId,
@@ -80,10 +80,8 @@ Future main(final dynamic context) async {
     if (timeTaken > timeAllowed.inSeconds) {
       context.log(
           'Time taken exceeds allowed time: $timeTaken seconds, whereas allowed is ${timeAllowed.inSeconds} seconds');
-      databases.deleteDocument(
-          databaseId: databaseId,
-          collectionId: collectionId,
-          documentId: answerId);
+      tablesDB.deleteRow(
+          databaseId: databaseId, tableId: answerId, rowId: answerId);
       context.log('Answer deleted due to time limit exceeded');
       return context.res.send(
           jsonEncode({
@@ -94,19 +92,19 @@ Future main(final dynamic context) async {
     }
 
     if (score > 0 && isCorrect) {
-      final scores = await databases.listDocuments(
+      final scores = await tablesDB.listRows(
         databaseId: databaseId,
-        collectionId: scoreId,
+        tableId: scoreTableId,
         queries: [
           Query.equal('game', gameId),
           Query.equal('playerID', playerId),
         ],
       );
-      if (scores.documents.isEmpty) {
-        await databases.createDocument(
+      if (scores.rows.isEmpty) {
+        await tablesDB.createRow(
           databaseId: databaseId,
-          collectionId: scoreId,
-          documentId: ID.unique(),
+          tableId: scoreTableId,
+          rowId: ID.unique(),
           data: {
             'playerID': playerId,
             'playerName': playerName,
@@ -115,21 +113,21 @@ Future main(final dynamic context) async {
           },
         );
       } else {
-        final existingScore = scores.documents.first;
+        final existingScore = scores.rows.first;
         final newScore =
             (existingScore.data['score'] as int) + (isCorrect ? score : 0);
-        await databases.updateDocument(
+        await tablesDB.updateRow(
           databaseId: databaseId,
-          collectionId: scoreId,
-          documentId: existingScore.$id,
+          tableId: scoreTableId,
+          rowId: existingScore.$id,
           data: {'score': newScore},
         );
       }
     }
-    databases.updateDocument(
+    tablesDB.updateRow(
       databaseId: databaseId,
-      collectionId: collectionId,
-      documentId: answerId,
+      tableId: answerId,
+      rowId: answerId,
       data: {'correct': isCorrect, 'score': isCorrect ? score : 0},
     );
 
@@ -153,37 +151,36 @@ Future main(final dynamic context) async {
 }
 
 Future<bool> checkIfAnswerExists({
-  required final Databases databases,
+  required final TablesDB tablesDB,
   required final String answerId,
   required final String playerId,
   required final String questionId,
   required final Map<String, dynamic> payload,
   required final dynamic context,
 }) async {
-  final previousAnswer = await databases.listDocuments(
+  final previousAnswer = await tablesDB.listRows(
     databaseId: databaseId,
-    collectionId: collectionId,
+    tableId: answerTableId,
     queries: [
       Query.equal('playerID', playerId),
       Query.equal('questionID', questionId),
       Query.equal('games', payload['games']['\$id']),
       Query.limit(2), // Only need to check if more than 1 exists
+      Query.select(['*', 'games.*'])
     ],
   );
 
-  if (previousAnswer.documents.length > 1) {
+  if (previousAnswer.rows.length > 1) {
     context.log('Previous answer found for player: $playerId');
-    databases.deleteDocument(
-        databaseId: databaseId,
-        collectionId: collectionId,
-        documentId: answerId);
+    tablesDB.deleteRow(
+        databaseId: databaseId, tableId: answerTableId, rowId: answerId);
     return true;
   }
   return false;
 }
 
 String? getQuestion({
-  required final Databases databases,
+  required final TablesDB tablesDB,
   required final dynamic payload,
   required final String questionId,
   required final dynamic context,

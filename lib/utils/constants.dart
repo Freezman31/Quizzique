@@ -2,12 +2,12 @@ class Constants {
   static String appwriteUrl = '';
   static String appwriteProjectId = '';
   static String databaseId = '';
-  static String usersCollectionId = '';
-  static String quizzesCollectionId = '';
-  static String answersCollectionId = '';
-  static String gamesCollectionId = '';
+  static String usersTableId = '';
+  static String quizzesTableId = '';
+  static String answersTableId = '';
+  static String gamesTableId = '';
   static String answerCheckFunctionId = '';
-  static String scoresCollectionId = '';
+  static String scoresTableId = '';
   static String url = '';
   static String port = '';
   static bool isDemo = false;
@@ -16,12 +16,12 @@ class Constants {
     required String appwriteUrl,
     required String appwriteProjectId,
     required String databaseId,
-    required String usersCollectionId,
-    required String quizzesCollectionId,
-    required String answersCollectionId,
-    required String gamesCollectionId,
+    required String usersTableId,
+    required String quizzesTableId,
+    required String answersTableId,
+    required String gamesTableId,
     required String answerCheckFunctionId,
-    required String scoresCollectionId,
+    required String scoresTableId,
     required String url,
     String port = '',
     bool isDemo = false,
@@ -29,12 +29,12 @@ class Constants {
     Constants.appwriteUrl = appwriteUrl;
     Constants.appwriteProjectId = appwriteProjectId;
     Constants.databaseId = databaseId;
-    Constants.usersCollectionId = usersCollectionId;
-    Constants.quizzesCollectionId = quizzesCollectionId;
-    Constants.answersCollectionId = answersCollectionId;
-    Constants.gamesCollectionId = gamesCollectionId;
+    Constants.usersTableId = usersTableId;
+    Constants.quizzesTableId = quizzesTableId;
+    Constants.answersTableId = answersTableId;
+    Constants.gamesTableId = gamesTableId;
     Constants.answerCheckFunctionId = answerCheckFunctionId;
-    Constants.scoresCollectionId = scoresCollectionId;
+    Constants.scoresTableId = scoresTableId;
     Constants.url = url;
     Constants.port = port;
     Constants.isDemo = isDemo;

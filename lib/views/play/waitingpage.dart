@@ -50,12 +50,12 @@ class _WaitingPageState extends State<WaitingPage> {
         });
         Realtime realtime = Realtime(widget.client);
         sub = realtime.subscribe([
-          'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.$newGameID',
+          'databases.${Constants.databaseId}.tables.${Constants.gamesTableId}.rows.$newGameID',
         ]);
         sub!.stream.listen((event) {
           Logger().i('Received event: $event, PAYLOAD: ${event.payload}');
           if (event.events.contains(
-            'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.$newGameID',
+            'databases.${Constants.databaseId}.tables.${Constants.gamesTableId}.rows.$newGameID',
           )) {
             getPlayers(client: widget.client, gameID: newGameID).then((
               newValue,

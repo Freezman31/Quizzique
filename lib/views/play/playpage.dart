@@ -50,11 +50,11 @@ class _PlayPageState extends State<PlayPage> {
         Logger().i('Subscribing to question updates for game ID: ${v.gameID}');
 
         sub = realtime!.subscribe([
-          'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
+          'databases.${Constants.databaseId}.tables.${Constants.gamesTableId}.rows.${v.gameID}',
         ]);
         sub.stream.listen((event) {
           if (event.events.contains(
-                'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
+                'databases.${Constants.databaseId}.tables.${Constants.gamesTableId}.rows.${v.gameID}',
               ) &&
               jsonDecode(event.payload['currentQuestion'])['id'] !=
                   q.questionID &&
@@ -77,7 +77,7 @@ class _PlayPageState extends State<PlayPage> {
               });
             });
           } else if (event.events.contains(
-                'databases.${Constants.databaseId}.collections.${Constants.gamesCollectionId}.documents.${v.gameID}',
+                'databases.${Constants.databaseId}.tables.${Constants.gamesTableId}.rows.${v.gameID}',
               ) &&
               event.payload['ended'] == true) {
             Logger().i('Game ended, navigating to results page.');

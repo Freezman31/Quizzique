@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Row;
 import 'package:logger/logger.dart';
 import 'package:quizzique/utils/constants.dart';
 
@@ -16,16 +16,15 @@ Future<bool> isCodeValid(String code, {required Client client}) async {
       return false;
     }
   }
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
   try {
-    DocumentList result = await databases.listDocuments(
+    RowList result = await tablesDB.listRows(
       databaseId: Constants.databaseId,
-      collectionId: Constants.gamesCollectionId,
+      tableId: Constants.gamesTableId,
       queries: [Query.equal('code', int.parse(code))],
     );
     if (result.total == 0) return false;
-    return jsonDecode(result.documents.first.data['currentQuestion'])['i'] ==
-        -1;
+    return jsonDecode(result.rows.first.data['currentQuestion'])['i'] == -1;
   } catch (e) {
     Logger().e('Error checking code validity: $e');
     return false;
@@ -36,34 +35,36 @@ Future<Question> getCurrentQuestion({
   required Client client,
   required int code,
 }) {
-  Databases databases = Databases(client);
-  return databases
-      .listDocuments(
+  TablesDB tablesDB = TablesDB(client);
+  return tablesDB
+      .listRows(
         databaseId: Constants.databaseId,
-        collectionId: Constants.gamesCollectionId,
-        queries: [Query.equal('code', code)],
+        tableId: Constants.gamesTableId,
+        queries: [
+          Query.equal('code', code),
+          Query.select(['*', 'quiz.durationBeforeAnswer']),
+        ],
       )
-      .then((documents) {
-        if (documents.total == 0) {
-          throw Exception('No documents found for the given code.');
+      .then((rows) {
+        if (rows.total == 0) {
+          throw Exception('No rows found for the given code.');
         }
-        if (documents.total > 1) {
-          throw Exception('Multiple documents found for the given code.');
+        if (rows.total > 1) {
+          throw Exception('Multiple rows found for the given code.');
         }
-        Document document = documents.documents.first;
+        Row row = rows.rows.first;
 
-        final payload = jsonDecode(document.data['currentQuestion']);
+        final payload = jsonDecode(row.data['currentQuestion']);
         Logger().i('Current question ID: ${payload['id'].toString()}');
         return Question(
-          gameID: document.$id,
+          gameID: row.$id,
           questionID: payload['id'].toString(),
           questionIndex: payload['i'] as int,
           question: payload['question'] as String,
           answers: List<String>.from(payload['answers'] as List),
           correctAnswerIndex: payload['correctAnswerIndex'] as int?,
           duration: payload['d'] as int,
-          durationBeforeAnswer:
-              document.data['quiz']['durationBeforeAnswer'] as int,
+          durationBeforeAnswer: row.data['quiz']['durationBeforeAnswer'] as int,
           type: QuestionType.values[payload['t'] as int],
         );
       })
@@ -77,21 +78,24 @@ Future<void> goToNextQuestion({
   required String gameID,
   required Question currentQuestion,
 }) async {
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
 
-  final game = await databases.getDocument(
+  final game = await tablesDB.getRow(
     databaseId: Constants.databaseId,
-    collectionId: Constants.gamesCollectionId,
-    documentId: gameID,
+    tableId: Constants.gamesTableId,
+    rowId: gameID,
+    queries: [
+      Query.select(['quiz.questions']),
+    ],
   );
   final nextQuestion = jsonDecode(
     game.data['quiz']['questions'][currentQuestion.questionIndex + 1],
   );
 
-  await databases.updateDocument(
+  await tablesDB.updateRow(
     databaseId: Constants.databaseId,
-    collectionId: Constants.gamesCollectionId,
-    documentId: gameID,
+    tableId: Constants.gamesTableId,
+    rowId: gameID,
     data: {
       'currentQuestion': jsonEncode({
         'id': nextQuestion['id'].toString(),
@@ -169,13 +173,13 @@ class Question {
     required int answerIndex,
     required String playerName,
   }) async {
-    Databases databases = Databases(client);
+    TablesDB tablesDB = TablesDB(client);
     Logger().i('Answering question $questionID with answer index $answerIndex');
     final id = ID.unique();
-    final doc = await databases.createDocument(
+    final row = await tablesDB.createRow(
       databaseId: Constants.databaseId,
-      collectionId: Constants.answersCollectionId,
-      documentId: id,
+      tableId: Constants.answersTableId,
+      rowId: id,
       data: {
         'questionID': questionID,
         'answer': answerIndex,
@@ -191,15 +195,18 @@ class Question {
         body: jsonEncode({
           'questionID': questionID,
           'answerIndex': answerIndex,
-          'games': (await databases.getDocument(
+          'games': (await tablesDB.getRow(
             databaseId: Constants.databaseId,
-            collectionId: Constants.gamesCollectionId,
-            documentId: gameID,
+            tableId: Constants.gamesTableId,
+            rowId: gameID,
+            queries: [
+              Query.select(['*', 'quiz.*']),
+            ],
           )).data,
           'playerID': await _getDeviceID(client: client),
           'playerName': playerName,
           '\$id': id,
-          '\$updatedAt': doc.$updatedAt,
+          '\$updatedAt': row.$updatedAt,
         }),
       );
       if (res.responseStatusCode != 200) {
@@ -212,10 +219,10 @@ class Question {
           //continue;
           break;
         } else {
-          databases.deleteDocument(
-            databaseId: doc.$databaseId,
-            collectionId: doc.$collectionId,
-            documentId: doc.$id,
+          tablesDB.deleteRow(
+            databaseId: row.$databaseId,
+            tableId: row.$tableId,
+            rowId: row.$id,
           );
           break;
         }
@@ -253,18 +260,25 @@ Future<List<Score>> getScores({
   required Client client,
   required String gameID,
 }) async {
-  Databases databases = Databases(client);
-  final scores = await databases.listDocuments(
+  TablesDB tablesDB = TablesDB(client);
+  final scores = await tablesDB.listRows(
     databaseId: Constants.databaseId,
-    collectionId: Constants.scoresCollectionId,
-    queries: [Query.equal('game', gameID), Query.orderDesc('score')],
+    tableId: Constants.scoresTableId,
+    queries: [
+      Query.equal('game', gameID),
+      Query.orderDesc('score'),
+      Query.select(['*']),
+    ],
   );
 
   final List<Map<String, dynamic>> players =
-      ((await databases.getDocument(
+      ((await tablesDB.getRow(
                 databaseId: Constants.databaseId,
-                collectionId: Constants.gamesCollectionId,
-                documentId: gameID,
+                tableId: Constants.gamesTableId,
+                rowId: gameID,
+                queries: [
+                  Query.select(['players']),
+                ],
               )).data['players']
               as List<dynamic>)
           .map((e) => jsonDecode(e.toString()) as Map<String, dynamic>)
@@ -272,8 +286,8 @@ Future<List<Score>> getScores({
 
   Logger().i('Players in game $gameID: $players');
 
-  final nonNull = scores.documents.map<Score>((doc) {
-    final data = doc.data;
+  final nonNull = scores.rows.map<Score>((row) {
+    final data = row.data;
     return Score(
       playerID: data['playerID'],
       score: data['score'],
@@ -313,12 +327,12 @@ Future<Score> getPlayerScore({
 }
 
 Future<void> endGame({required Client client, required String gameID}) async {
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
   try {
-    await databases.updateDocument(
+    await tablesDB.updateRow(
       databaseId: Constants.databaseId,
-      collectionId: Constants.gamesCollectionId,
-      documentId: gameID,
+      tableId: Constants.gamesTableId,
+      rowId: gameID,
       data: {'ended': true},
     );
     Logger().i('Game $gameID ended successfully');
@@ -332,12 +346,12 @@ Future<void> deleteGame({
   required Client client,
   required String gameID,
 }) async {
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
   try {
-    await databases.deleteDocument(
+    await tablesDB.deleteRow(
       databaseId: Constants.databaseId,
-      collectionId: Constants.gamesCollectionId,
-      documentId: gameID,
+      tableId: Constants.gamesTableId,
+      rowId: gameID,
     );
     Logger().i('Game $gameID deleted successfully');
   } catch (e) {
@@ -358,16 +372,16 @@ Future<User> createAccount({
   required BuildContext context,
 }) async {
   Account account = Account(client);
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
   try {
     final User user = await account.get();
     await account.updateEmail(email: email, password: password);
     await account.updateName(name: username);
-    // Create a document in the users collection
-    await databases.createDocument(
+    // Create a table in the users collection
+    await tablesDB.createRow(
       databaseId: Constants.databaseId,
-      collectionId: Constants.usersCollectionId,
-      documentId: user.$id,
+      tableId: Constants.usersTableId,
+      rowId: user.$id,
       data: {'userID': user.$id, 'username': username},
     );
     Logger().i('Account created for user: ${user.name}');
@@ -430,16 +444,20 @@ Future<User> login({
 }
 
 Future<List<Quiz>> getQuizzesFromUser({required Client client}) async {
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
   final String userID = (await Account(client).get()).$id;
   Logger().i('Fetching quizzes for user: $userID');
   try {
-    final userData = await databases.getDocument(
+    final userData = await tablesDB.getRow(
       databaseId: Constants.databaseId,
-      collectionId: Constants.usersCollectionId,
-      documentId: userID,
+      tableId: Constants.usersTableId,
+      rowId: userID,
+      queries: [
+        Query.select(['quizzes.*']),
+      ],
     );
     final Map<String, dynamic> payload = userData.data;
+    Logger().i('User data fetched: $payload');
 
     return (payload['quizzes'] as List<dynamic>)
         .map((quiz) => Quiz.fromJson(quiz))
@@ -456,16 +474,19 @@ Future<GameCreationResponse> presentQuiz({
   required Client client,
   required Quiz quiz,
 }) async {
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
 
   int code = 0;
   while (true) {
     code = DateTime.now().millisecondsSinceEpoch % 1000000;
     // Check if the code is already in use
-    final existingGames = await databases.listDocuments(
+    final existingGames = await tablesDB.listRows(
       databaseId: Constants.databaseId,
-      collectionId: Constants.gamesCollectionId,
-      queries: [Query.equal('code', code)],
+      tableId: Constants.gamesTableId,
+      queries: [
+        Query.equal('code', code),
+        Query.select(['code']),
+      ],
     );
     if (existingGames.total == 0) {
       break; // Found a unique code
@@ -473,10 +494,10 @@ Future<GameCreationResponse> presentQuiz({
   }
   final String id = ID.unique();
 
-  await databases.createDocument(
+  await tablesDB.createRow(
     databaseId: Constants.databaseId,
-    collectionId: Constants.gamesCollectionId,
-    documentId: id,
+    tableId: Constants.gamesTableId,
+    rowId: id,
     data: {
       'quiz': quiz.id,
       'currentQuestion': jsonEncode({
@@ -500,11 +521,14 @@ Future<List<String>> getPlayers({
   required Client client,
   required String gameID,
 }) async {
-  Databases databases = Databases(client);
-  final game = await databases.getDocument(
+  TablesDB tablesDB = TablesDB(client);
+  final game = await tablesDB.getRow(
     databaseId: Constants.databaseId,
-    collectionId: Constants.gamesCollectionId,
-    documentId: gameID,
+    tableId: Constants.gamesTableId,
+    rowId: gameID,
+    queries: [
+      Query.select(['players']),
+    ],
   );
   return (game.data['players'] as List<dynamic>)
       .map((p) => (jsonDecode(p)['username']?.toString() ?? 'Unknown'))
@@ -516,7 +540,7 @@ Future<void> addPlayer({
   required int gameCode,
   required String username,
 }) async {
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
   Account account = Account(client);
   String userID;
   try {
@@ -527,23 +551,26 @@ Future<void> addPlayer({
   }
 
   final playerData = {'id': userID, 'username': username};
-  final DocumentList docs = await databases.listDocuments(
+  final RowList rows = await tablesDB.listRows(
     databaseId: Constants.databaseId,
-    collectionId: Constants.gamesCollectionId,
-    queries: [Query.equal('code', gameCode)],
+    tableId: Constants.gamesTableId,
+    queries: [
+      Query.equal('code', gameCode),
+      Query.select(['*']),
+    ],
   );
-  if (docs.total > 0) {
-    final gameID = docs.documents.first.$id;
-    await databases.updateDocument(
+  if (rows.total > 0) {
+    final gameID = rows.rows.first.$id;
+    await tablesDB.updateRow(
       databaseId: Constants.databaseId,
-      collectionId: Constants.gamesCollectionId,
-      documentId: gameID,
+      tableId: Constants.gamesTableId,
+      rowId: gameID,
       data: {
         'players': [
-          ...((await databases.getDocument(
+          ...((await tablesDB.getRow(
                 databaseId: Constants.databaseId,
-                collectionId: Constants.gamesCollectionId,
-                documentId: gameID,
+                tableId: Constants.gamesTableId,
+                rowId: gameID,
               )).data['players']
               as List<dynamic>),
           jsonEncode(playerData),
@@ -556,7 +583,7 @@ Future<void> addPlayer({
 }
 
 Future<void> saveQuiz({required Client client, required Quiz quiz}) async {
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
   final String userID = (await Account(client).get()).$id;
   Logger().i('Saving quiz ${quiz.id} for user: $userID');
 
@@ -567,10 +594,10 @@ Future<void> saveQuiz({required Client client, required Quiz quiz}) async {
     quiz.questions[i].questionIndex = i;
   }
 
-  await databases.upsertDocument(
+  await tablesDB.upsertRow(
     databaseId: Constants.databaseId,
-    collectionId: Constants.quizzesCollectionId,
-    documentId: quiz.id,
+    tableId: Constants.quizzesTableId,
+    rowId: quiz.id,
     data: quiz.toJson()..addAll({'owner': userID}),
     permissions: [
       'update("user:$userID")',
@@ -582,14 +609,14 @@ Future<void> saveQuiz({required Client client, required Quiz quiz}) async {
 }
 
 Future<void> deleteQuiz({required Client client, required Quiz quiz}) async {
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
   if (quiz.id.isEmpty) {
     return; // Nothing to delete
   }
-  await databases.deleteDocument(
+  await tablesDB.deleteRow(
     databaseId: Constants.databaseId,
-    collectionId: Constants.quizzesCollectionId,
-    documentId: quiz.id,
+    tableId: Constants.quizzesTableId,
+    rowId: quiz.id,
   );
 }
 
