@@ -6,13 +6,12 @@ import 'package:dart_appwrite/dart_appwrite.dart';
 const String databaseId = '6859582600031c46e49c';
 const String collectionId = '685d148300346d2203a7';
 const String scoreId = '68953e9100224ddb0584';
-const String appwriteEndpoint = 'https://cloud.appwrite.io/v1';
 
 Future main(final dynamic context) async {
   final Client client = Client()
-      .setEndpoint(appwriteEndpoint)
+      .setEndpoint(Platform.environment['APPWRITE_FUNCTION_API_ENDPOINT']!)
       .setProject(Platform.environment['APPWRITE_FUNCTION_PROJECT_ID'])
-      .setKey(Platform.environment['APPWRITE_KEY']);
+      .setKey(context.req.headers['x-appwrite-key']);
 
   final Databases databases = Databases(client);
   final payload = jsonDecode(context.req.body.toString());
@@ -26,7 +25,8 @@ Future main(final dynamic context) async {
     final String gameId = payload['games']['\$id'];
     final DateTime startTime = DateTime.parse(payload['games']['\$updatedAt']);
     final DateTime submitTime = DateTime.parse(payload['\$updatedAt']);
-    final QuestionType questionType = QuestionType.values[payload['t']];
+    final QuestionType questionType = QuestionType
+        .values[jsonDecode(payload['games']['currentQuestion'])['t']];
     final Duration timeAllowed = Duration(
         seconds:
             jsonDecode(payload['games']['currentQuestion'])['timeAllowed'] ??
@@ -69,7 +69,7 @@ Future main(final dynamic context) async {
     final int timeTaken = submitTime.difference(startTime).inSeconds - 3;
     int score;
     if (questionType == QuestionType.guess) {
-      final int range = int.parse(questionPayload['answers']['3'].toString());
+      final int range = int.parse(questionPayload['3'].toString());
       isCorrect = (userAnswer - correctAnswer).abs() <= range;
       score = (1000 * (1 - (timeTaken / 2) / timeAllowed.inSeconds)).ceil() *
           ((range - (userAnswer - correctAnswer).abs() * .5) / range).ceil();
