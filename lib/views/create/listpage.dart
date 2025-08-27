@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizzique/logic/logic.dart';
 import 'package:quizzique/utils/utils.dart';
+import 'package:quizzique/views/create/account.dart';
 import 'package:quizzique/views/loginpage.dart';
 import 'package:quizzique/views/play/waitingpage.dart';
 
@@ -38,6 +39,12 @@ class _ListPageState extends State<ListPage> {
         title: const Text('My Quizzes'),
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: fetchQuizzes),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed(AccountPage.route);
+            },
+            icon: const Icon(Icons.person),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {

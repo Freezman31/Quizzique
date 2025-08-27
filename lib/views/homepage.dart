@@ -3,6 +3,7 @@ import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:quizzique/utils/constants.dart';
+import 'package:quizzique/views/create/account.dart';
 import 'package:quizzique/views/create/listpage.dart';
 import 'package:quizzique/views/loginpage.dart';
 import 'package:quizzique/views/play/code.dart';
@@ -61,7 +62,27 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Quizzique')),
+      appBar: AppBar(
+        title: const Text('Quizzique'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              try {
+                Account acc = Account(widget.client);
+                final User user = await acc.get();
+                if (user.email != '') {
+                  Navigator.of(context).pushNamed(AccountPage.route);
+                } else {
+                  Navigator.of(context).pushNamed(LoginPage.route);
+                }
+              } catch (_) {
+                Navigator.of(context).pushNamed(LoginPage.route);
+              }
+            },
+            icon: const Icon(Icons.person),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Spacer(flex: 4),

@@ -443,6 +443,83 @@ Future<User> login({
   }
 }
 
+Future changePassword({
+  required Client client,
+  required String oldPassword,
+  required String newPassword,
+}) async {
+  Account account = Account(client);
+  try {
+    await account.updatePassword(
+      password: newPassword,
+      oldPassword: oldPassword,
+    );
+    Logger().i('Password changed successfully');
+  } catch (e) {
+    Logger().e('Error changing password: $e');
+    if (e is AppwriteException) {
+      if (e.code == 401) {
+        throw Exception('Old password is incorrect');
+      } else if (e.code == 400) {
+        throw Exception('Invalid input data');
+      } else {
+        throw Exception('Failed to change password: ${e.message}');
+      }
+    } else {
+      throw Exception('Failed to change password: $e');
+    }
+  }
+}
+
+Future updateEmail({
+  required Client client,
+  required String email,
+  required String password,
+}) async {
+  Account account = Account(client);
+  try {
+    await account.updateEmail(email: email, password: password);
+  } catch (e) {
+    Logger().e('Error updating account info: $e');
+    if (e is AppwriteException) {
+      if (e.code == 409) {
+        throw Exception('Email already in use');
+      } else if (e.code == 400) {
+        throw Exception('Invalid input data');
+      } else if (e.code == 401) {
+        throw Exception('Wrong password');
+      } else {
+        throw Exception('Failed to update account info: ${e.message}');
+      }
+    } else {
+      throw Exception('Failed to update account info: $e');
+    }
+  }
+}
+
+Future updateUsername({
+  required Client client,
+  required String username,
+}) async {
+  Account account = Account(client);
+  try {
+    await account.updateName(name: username);
+  } catch (e) {
+    Logger().e('Error updating username: $e');
+    if (e is AppwriteException) {
+      if (e.code == 409) {
+        throw Exception('Username already in use');
+      } else if (e.code == 400) {
+        throw Exception('Invalid input data');
+      } else {
+        throw Exception('Failed to update username: ${e.message}');
+      }
+    } else {
+      throw Exception('Failed to update username: $e');
+    }
+  }
+}
+
 Future<List<Quiz>> getQuizzesFromUser({required Client client}) async {
   TablesDB tablesDB = TablesDB(client);
   final String userID = (await Account(client).get()).$id;
