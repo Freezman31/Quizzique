@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
                 Moreover, as this is a demo, you loose your "account" (you can enter bogus data, as long as it looks valid) when you close/refresh the app.
                 Enjoy!
                 PS: Please report any bugs you find on the GitHub repository (there will definitely be some).
-                PS2: As this (still) is a demo, if you open another tab, you can play against yourself (or alone) to test the game.
+                PS2: If you open the website in private mode, you can play against yourself (or alone) to test the game.
                 PS3: For now, you will not receive a verification email.
                 ''', softWrap: true),
               actions: [
