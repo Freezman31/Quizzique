@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/utils/avatars.dart';
 import 'package:quizzique/utils/constants.dart';
 import 'package:quizzique/utils/utils.dart';
 import 'package:quizzique/views/play/presentpage.dart';
@@ -23,7 +24,7 @@ class _WaitingPageState extends State<WaitingPage> {
   String gameID = '';
   int gameCode = -1;
   Quiz quiz = Quiz.empty();
-  List<String> players = [];
+  List<Player> players = [];
   RealtimeSubscription? sub;
 
   @override
@@ -57,13 +58,15 @@ class _WaitingPageState extends State<WaitingPage> {
           if (event.events.contains(
             'databases.${Constants.databaseId}.tables.${Constants.gamesTableId}.rows.$newGameID',
           )) {
-            getPlayers(client: widget.client, gameID: newGameID).then((
-              newValue,
-            ) {
-              setState(() {
-                players = newValue;
+            try {
+              getPlayers(client: widget.client, gameID: newGameID).then((
+                newValue,
+              ) {
+                setState(() {
+                  players = newValue;
+                });
               });
-            });
+            } catch (_) {}
           }
         });
       });
@@ -221,11 +224,29 @@ class _WaitingPageState extends State<WaitingPage> {
                         horizontal: 12,
                         vertical: 8,
                       ),
-                      child: Text(
-                        player,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.headlineMedium,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image(
+                            image: ResizeImage(
+                              AssetImage(avatarToFile(avatar: player.avatar)),
+                              width: Theme.of(
+                                context,
+                              ).textTheme.headlineMedium?.fontSize?.toInt(),
+                              policy: ResizeImagePolicy.fit,
+                              height: Theme.of(
+                                context,
+                              ).textTheme.headlineMedium?.fontSize?.toInt(),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            player.username,
+                            softWrap: false,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                        ],
                       ),
                     ),
                   ),

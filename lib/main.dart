@@ -29,6 +29,12 @@ void main() async {
     final license = await rootBundle.loadString('assets/google_fonts/OFL.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(
+      ['avatars'],
+      'https://fr.vecteezy.com/vecteur-libre/visage - Visage Vecteurs par Vecteezy',
+    );
+  });
   if (dotenv.getBool('DEBUG', fallback: false)) {
     Logger.level = Level.debug;
     Logger().i('Debug mode is enabled');

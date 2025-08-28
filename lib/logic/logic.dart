@@ -5,6 +5,7 @@ import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Row;
 import 'package:logger/logger.dart';
+import 'package:quizzique/utils/avatars.dart';
 import 'package:quizzique/utils/constants.dart';
 
 Future<bool> isCodeValid(String code, {required Client client}) async {
@@ -292,6 +293,11 @@ Future<List<Score>> getScores({
       playerID: data['playerID'],
       score: data['score'],
       playerName: data['playerName'],
+      avatar:
+          Avatar.values[players.firstWhere(
+                (p) => p['id'] == data['playerID'],
+              )['avatar'] ??
+              0],
     );
   }).toList();
 
@@ -306,6 +312,7 @@ Future<List<Score>> getScores({
         playerID: player['id'],
         score: 0,
         playerName: player['username'],
+        avatar: Avatar.values[player['avatar'] ?? 0],
       ),
     ),
   );
@@ -320,7 +327,12 @@ Future<Score> getPlayerScore({
   final String deviceID = await _getDeviceID(client: client);
   final Score playerScore = scores.firstWhere(
     (score) => score.playerID == deviceID,
-    orElse: () => Score(playerID: deviceID, score: 0, playerName: 'You'),
+    orElse: () => Score(
+      playerID: deviceID,
+      score: 0,
+      playerName: 'You',
+      avatar: Avatar.values[0], // Should never happen
+    ),
   );
   playerScore.ranking = scores.indexOf(playerScore) + 1;
   return playerScore;
@@ -594,7 +606,7 @@ Future<GameCreationResponse> presentQuiz({
   return GameCreationResponse(gameID: id, code: code);
 }
 
-Future<List<String>> getPlayers({
+Future<List<Player>> getPlayers({
   required Client client,
   required String gameID,
 }) async {
@@ -608,7 +620,13 @@ Future<List<String>> getPlayers({
     ],
   );
   return (game.data['players'] as List<dynamic>)
-      .map((p) => (jsonDecode(p)['username']?.toString() ?? 'Unknown'))
+      .map(
+        (p) => (Player(
+          id: jsonDecode(p)['id']?.toString() ?? 'Unknown',
+          username: jsonDecode(p)['username']?.toString() ?? 'Unknown',
+          avatar: Avatar.values[jsonDecode(p)['avatar'] ?? 0],
+        )),
+      )
       .toList();
 }
 
@@ -616,6 +634,7 @@ Future<void> addPlayer({
   required Client client,
   required int gameCode,
   required String username,
+  required Avatar avatar,
 }) async {
   TablesDB tablesDB = TablesDB(client);
   Account account = Account(client);
@@ -627,7 +646,11 @@ Future<void> addPlayer({
     userID = sess.userId;
   }
 
-  final playerData = {'id': userID, 'username': username};
+  final playerData = {
+    'id': userID,
+    'username': username,
+    'avatar': avatar.index,
+  };
   final RowList rows = await tablesDB.listRows(
     databaseId: Constants.databaseId,
     tableId: Constants.gamesTableId,
@@ -814,13 +837,23 @@ class Score {
   final int score;
   int? ranking;
   final String playerName;
+  final Avatar avatar;
 
   Score({
     required this.playerID,
     required this.score,
     required this.playerName,
+    required this.avatar,
     this.ranking,
   });
+}
+
+class Player {
+  final String id;
+  final String username;
+  final Avatar avatar;
+
+  Player({required this.id, required this.username, required this.avatar});
 }
 
 enum AnswerStatus { correct, incorrect, alreadyAnswered, tooLate }

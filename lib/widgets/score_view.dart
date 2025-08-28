@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/utils/avatars.dart';
 import 'package:quizzique/utils/utils.dart';
 
 class ScoreView extends StatelessWidget {
@@ -45,6 +46,15 @@ class ScoreView extends StatelessWidget {
                     : rank == 3
                     ? Color(0xffcd7f32)
                     : Colors.black,
+              ),
+            ),
+            SizedBox(width: mq.size.width * 0.05),
+            Image(
+              image: ResizeImage(
+                AssetImage(avatarToFile(avatar: score.avatar)),
+                width: (mq.size.height * 0.08).toInt(),
+                height: (mq.size.height * 0.08).toInt(),
+                policy: ResizeImagePolicy.fit,
               ),
             ),
             SizedBox(width: mq.size.width * 0.05),

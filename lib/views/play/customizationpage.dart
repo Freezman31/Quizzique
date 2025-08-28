@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/utils/avatars.dart';
 import 'package:quizzique/views/play/playpage.dart';
 
 class CustomizationPage extends StatefulWidget {
@@ -17,6 +18,7 @@ class CustomizationPage extends StatefulWidget {
 class _CustomizationPageState extends State<CustomizationPage> {
   String _username = '';
   late final TextEditingController _usernameController;
+  int avatarIndex = 0;
   int code = -1;
 
   @override
@@ -52,6 +54,80 @@ class _CustomizationPageState extends State<CustomizationPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(8.0),
+                ),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      final size = MediaQuery.of(context).size;
+                      return Dialog(
+                        child: Container(
+                          width: min(size.width * .8, size.height * .8),
+                          height: min(size.height * .8, size.width * .8),
+                          padding: const EdgeInsets.all(8.0),
+                          child: GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                  childAspectRatio: 1,
+                                ),
+                            itemCount: Avatar.values.length,
+                            itemBuilder: (context, index) {
+                              return ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    avatarIndex = index;
+                                  });
+                                  Navigator.of(context).pop();
+                                },
+                                child: Image(
+                                  image: ResizeImage(
+                                    AssetImage(
+                                      avatarToFile(
+                                        avatar: Avatar.values[index],
+                                      ),
+                                    ),
+                                    height:
+                                        (min(
+                                                  size.width * .8,
+                                                  size.height * .8,
+                                                ) *
+                                                .8 /
+                                                3)
+                                            .toInt(),
+                                    width:
+                                        (min(
+                                                  size.width * .8,
+                                                  size.height * .8,
+                                                ) *
+                                                .8 /
+                                                3)
+                                            .toInt(),
+                                    policy: ResizeImagePolicy.fit,
+                                    allowUpscaling: true,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: Image(
+                  image: AssetImage(
+                    avatarToFile(avatar: Avatar.values[avatarIndex]),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Enter your username',
@@ -66,12 +142,14 @@ class _CustomizationPageState extends State<CustomizationPage> {
                   });
                 },
               ),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {
                   await addPlayer(
                     client: widget.client,
                     gameCode: code,
                     username: _username,
+                    avatar: Avatar.values[avatarIndex],
                   );
                   Navigator.of(context).pushNamed(
                     PlayPage.route,

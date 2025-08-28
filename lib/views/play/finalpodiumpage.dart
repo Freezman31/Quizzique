@@ -1,6 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/utils/avatars.dart';
 import 'package:quizzique/views/homepage.dart';
 import 'package:quizzique/widgets/score_view.dart';
 
@@ -68,7 +69,19 @@ class _FinalPodiumPageState extends State<FinalPodiumPage> {
                             const SizedBox(height: 10),
                             Text(
                               podium[1].score.toString(),
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.black),
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(color: Colors.black),
+                            ),
+                            const SizedBox(height: 10),
+                            Image(
+                              image: ResizeImage(
+                                AssetImage(
+                                  avatarToFile(avatar: podium[1].avatar),
+                                ),
+                                policy: ResizeImagePolicy.fit,
+                                height: (mq.size.height * 0.15).toInt(),
+                                width: (mq.size.height * 0.15).toInt(),
+                              ),
                             ),
                           ],
                         ),
@@ -81,12 +94,25 @@ class _FinalPodiumPageState extends State<FinalPodiumPage> {
                         children: [
                           Text(
                             podium[0].playerName,
-                            style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: Colors.black),
+                            style: Theme.of(context).textTheme.headlineLarge
+                                ?.copyWith(color: Colors.black),
                           ),
                           const SizedBox(height: 10),
                           Text(
                             podium[0].score.toString(),
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.black),
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(color: Colors.black),
+                          ),
+                          const SizedBox(height: 10),
+                          Image(
+                            image: ResizeImage(
+                              AssetImage(
+                                avatarToFile(avatar: podium[0].avatar),
+                              ),
+                              policy: ResizeImagePolicy.fit,
+                              height: (mq.size.height * 0.2).toInt(),
+                              width: (mq.size.height * 0.2).toInt(),
+                            ),
                           ),
                         ],
                       ),
@@ -100,12 +126,25 @@ class _FinalPodiumPageState extends State<FinalPodiumPage> {
                           children: [
                             Text(
                               podium[2].playerName,
-                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: Colors.black),
+                              style: Theme.of(context).textTheme.headlineLarge
+                                  ?.copyWith(color: Colors.black),
                             ),
                             const SizedBox(height: 10),
                             Text(
                               podium[2].score.toString(),
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.black),
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(color: Colors.black),
+                            ),
+                            const SizedBox(height: 10),
+                            Image(
+                              image: ResizeImage(
+                                AssetImage(
+                                  avatarToFile(avatar: podium[2].avatar),
+                                ),
+                                policy: ResizeImagePolicy.fit,
+                                height: (mq.size.height * 0.1).toInt(),
+                                width: (mq.size.height * 0.1).toInt(),
+                              ),
                             ),
                           ],
                         ),
