@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:quizzique/logic/logic.dart';
@@ -26,11 +27,19 @@ class _WaitingPageState extends State<WaitingPage> {
   Quiz quiz = Quiz.empty();
   List<Player> players = [];
   RealtimeSubscription? sub;
+  final AudioPlayer audioPlayer = AudioPlayer();
 
   @override
-  void dispose() {
+  void dispose() async {
     sub?.close();
+    audioPlayer.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    _playBackgroundMusic();
+    super.initState();
   }
 
   @override
@@ -84,6 +93,8 @@ class _WaitingPageState extends State<WaitingPage> {
             gameID: gameID,
             currentQuestion: Question.empty()..questionIndex = -1,
           );
+          await audioPlayer.stop();
+          await audioPlayer.dispose();
           Navigator.pushNamed(
             context,
             PresentPage.route,
@@ -266,5 +277,11 @@ class _WaitingPageState extends State<WaitingPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _playBackgroundMusic() async {
+    await audioPlayer.setAsset('assets/music/wait.mp3');
+    await audioPlayer.setLoopMode(LoopMode.all);
+    await audioPlayer.play();
   }
 }
