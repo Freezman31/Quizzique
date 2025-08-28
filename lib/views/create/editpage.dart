@@ -1,6 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/utils/utils.dart';
 import 'package:quizzique/widgets/quiz_edit.dart';
 
 class EditPage extends StatefulWidget {
@@ -88,12 +89,28 @@ class _EditPageState extends State<EditPage> {
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   const SizedBox(width: 8),
+                  Text(
+                    quiz.description.max(50),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(width: 16),
                   IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () async {
-                      await editQuizName();
+                      await editQuizInfos();
                     },
-                    tooltip: 'Edit Quiz Name',
+                    tooltip: 'Edit Quiz Infos',
+                  ),
+                  const SizedBox(width: 32),
+                  IconButton(
+                    icon: Icon(quiz.isPublic ? Icons.lock_open : Icons.lock),
+                    onPressed: () async {
+                      setState(() {
+                        quiz.isPublic = !quiz.isPublic;
+                      });
+                    },
+                    tooltip:
+                        'Set visibility to ${quiz.isPublic ? "private" : "public"}',
                   ),
                 ],
               ),
@@ -143,7 +160,7 @@ class _EditPageState extends State<EditPage> {
     ).then((value) => value ?? false);
   }
 
-  Future<void> editQuizName() async {
+  Future<void> editQuizInfos() async {
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -151,29 +168,51 @@ class _EditPageState extends State<EditPage> {
         final TextEditingController nameController = TextEditingController(
           text: quiz.name,
         );
+        final TextEditingController descController = TextEditingController(
+          text: quiz.description,
+        );
+        final MediaQueryData mq = MediaQuery.of(context);
         return AlertDialog(
-          title: const Text('Edit Quiz Name'),
-          content: TextField(
-            controller: nameController,
-            decoration: const InputDecoration(hintText: 'Enter quiz name'),
-            autocorrect: true,
-            textCapitalization: TextCapitalization.sentences,
-            maxLength: 100,
-            keyboardType: TextInputType.text,
-            onSubmitted: (value) {
-              setState(() {
-                quiz.name = nameController.text;
-              });
-              Navigator.of(context).pop();
-            },
+          title: const Text('Edit Quiz Infos'),
+          content: SizedBox(
+            height: mq.size.height * 0.3,
+            width: mq.size.width * 0.3,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter quiz name',
+                  ),
+                  autocorrect: true,
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLength: 100,
+                  keyboardType: TextInputType.text,
+                ),
+                TextField(
+                  autocorrect: true,
+                  controller: descController,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter quiz description',
+                  ),
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLength: 256,
+                  maxLines: 4,
+                  keyboardType: TextInputType.text,
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 setState(() {
                   quiz.name = nameController.text;
+                  quiz.description = descController.text;
                 });
                 nameController.dispose();
+                descController.dispose();
                 Navigator.of(context).pop();
               },
               child: const Text('Save'),
@@ -181,6 +220,7 @@ class _EditPageState extends State<EditPage> {
             TextButton(
               onPressed: () {
                 nameController.dispose();
+                descController.dispose();
                 Navigator.of(context).pop();
               },
               child: const Text('Cancel'),

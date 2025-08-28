@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
 import 'package:quizzique/utils/constants.dart';
 import 'package:quizzique/views/create/account.dart';
+import 'package:quizzique/views/create/browse.dart';
 import 'package:quizzique/views/create/editpage.dart';
 import 'package:quizzique/views/create/listpage.dart';
 import 'package:quizzique/views/homepage.dart';
@@ -119,6 +120,7 @@ class QuizApp extends StatelessWidget {
         CustomizationPage.route: (context) => CustomizationPage(client: client),
         FinalPodiumPage.route: (context) => FinalPodiumPage(client: client),
         AccountPage.route: (context) => AccountPage(client: client),
+        BrowsePage.route: (context) => BrowsePage(client: client),
       },
       onGenerateRoute: (settings) {
         final uri = Uri.parse(settings.name ?? '');

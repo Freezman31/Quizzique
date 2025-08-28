@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:quizzique/logic/logic.dart';
 import 'package:quizzique/utils/utils.dart';
 import 'package:quizzique/views/create/account.dart';
+import 'package:quizzique/views/create/browse.dart';
+import 'package:quizzique/views/create/editpage.dart';
 import 'package:quizzique/views/loginpage.dart';
 import 'package:quizzique/views/play/waitingpage.dart';
 
@@ -139,17 +141,36 @@ class _ListPageState extends State<ListPage> {
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Quiz newQuiz = Quiz.empty();
-          Navigator.pushNamed(
-            context,
-            '/create/edit',
-            arguments: {'quiz': newQuiz},
-          ).then((_) => fetchQuizzes());
-        },
-        tooltip: 'Create Quiz',
-        child: const Icon(Icons.add),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: SingleChildScrollView(
+        child: Column(
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.pushNamed(context, BrowsePage.route);
+              },
+              tooltip: 'Browse Quizzes',
+              mini: true,
+              heroTag: 'Search',
+              child: const Icon(Icons.search),
+            ),
+            const SizedBox(height: 10),
+            FloatingActionButton(
+              onPressed: () {
+                Quiz newQuiz = Quiz.empty();
+                Navigator.pushNamed(
+                  context,
+                  EditPage.route,
+                  arguments: {'quiz': newQuiz},
+                ).then((_) => fetchQuizzes());
+              },
+              tooltip: 'Create Quiz',
+              mini: false,
+              heroTag: 'Create',
+              child: const Icon(Icons.add),
+            ),
+          ],
+        ),
       ),
     );
   }

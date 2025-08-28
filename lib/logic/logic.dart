@@ -703,7 +703,7 @@ Future<void> saveQuiz({required Client client, required Quiz quiz}) async {
       'update("user:$userID")',
       'delete("user:$userID")',
       'read("user:$userID")',
-      'read("any")',
+      if (quiz.isPublic) 'read("any")',
     ],
   );
 }
@@ -720,6 +720,27 @@ Future<void> deleteQuiz({required Client client, required Quiz quiz}) async {
   );
 }
 
+Future<List<Quiz>> browseQuiz({
+  required Client client,
+  String? searchQuery,
+}) async {
+  TablesDB tablesDB = TablesDB(client);
+  final rows = await tablesDB.listRows(
+    databaseId: Constants.databaseId,
+    tableId: Constants.quizzesTableId,
+    queries: [
+      Query.equal('isPublic', true),
+      Query.notEqual('owner', (await Account(client).get()).$id),
+      Query.select(['*']),
+      Query.limit(10),
+      Query.orderDesc('\$updatedAt'),
+      if (searchQuery != null && searchQuery.isNotEmpty)
+        Query.search('name', searchQuery),
+    ],
+  );
+  return rows.rows.map((row) => Quiz.fromJson(row.data)).toList();
+}
+
 class GameCreationResponse {
   final String gameID;
   final int code;
@@ -732,23 +753,32 @@ class Quiz {
   String name;
   List<Question> questions;
   int durationBeforeAnswer;
+  String description;
+  bool isPublic;
 
   Quiz({
     required this.id,
     required this.name,
     required this.questions,
     required this.durationBeforeAnswer,
+    required this.description,
+    required this.isPublic,
   });
 
   Quiz.empty()
     : id = '',
       name = 'New Quiz',
       questions = [Question.empty()],
-      durationBeforeAnswer = 5;
+      durationBeforeAnswer = 5,
+      description = '',
+      isPublic = true;
+
   Quiz.fromJson(Map<String, dynamic> json)
     : id = json['\$id'] as String,
       name = json['name'] as String,
       durationBeforeAnswer = json['durationBeforeAnswer'] as int,
+      isPublic = json['isPublic'] as bool,
+      description = json['description'] as String,
       questions = (json['questions'] as List<dynamic>)
           .map((q) => jsonDecode(q.toString()))
           .map(
@@ -766,7 +796,7 @@ class Quiz {
               correctAnswerIndex: q['c'] as int?,
               duration: q['d'] as int,
               durationBeforeAnswer: json['durationBeforeAnswer'] as int,
-              type: QuestionType.values[q['t'] as int],
+              type: QuestionType.values[q['t'] as int? ?? 0],
             ),
           )
           .toList();
@@ -779,6 +809,8 @@ class Quiz {
       '\$id': id,
       'name': name,
       'durationBeforeAnswer': durationBeforeAnswer,
+      'description': description,
+      'isPublic': isPublic,
       'questions': questions.map((q) {
         return jsonEncode({
           'id': q.questionID == '' ? ID.unique() : q.questionID,
@@ -821,6 +853,8 @@ class Quiz {
       name: name,
       questions: List<Question>.from(questions.map((e) => e.copy())),
       durationBeforeAnswer: durationBeforeAnswer,
+      description: description,
+      isPublic: isPublic,
     );
   }
 }
