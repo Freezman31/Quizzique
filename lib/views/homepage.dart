@@ -1,5 +1,5 @@
 import 'package:appwrite/appwrite.dart';
-import 'package:appwrite/models.dart';
+import 'package:appwrite/models.dart' hide Row;
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:quizzique/utils/constants.dart';
@@ -148,11 +148,31 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           Spacer(flex: 6),
-          Text(
-            'Made with ❤️ - 2025',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Made with ❤️ - 2025   ',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+              ),
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  child: Text(
+                    'Licenses',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey.shade600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  onTap: () {
+                    showLicensePage(context: context);
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),
