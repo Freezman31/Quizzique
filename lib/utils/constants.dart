@@ -11,6 +11,7 @@ class Constants {
   static String url = '';
   static String port = '';
   static bool isDemo = false;
+  static String bucketId = '';
 
   static void init({
     required String appwriteUrl,
@@ -23,6 +24,7 @@ class Constants {
     required String answerCheckFunctionId,
     required String scoresTableId,
     required String url,
+    required String bucketId,
     String port = '',
     bool isDemo = false,
   }) {
@@ -38,5 +40,6 @@ class Constants {
     Constants.url = url;
     Constants.port = port;
     Constants.isDemo = isDemo;
+    Constants.bucketId = bucketId;
   }
 }

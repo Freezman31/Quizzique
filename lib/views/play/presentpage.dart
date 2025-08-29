@@ -49,6 +49,12 @@ class _PresentPageState extends State<PresentPage> {
               ),
             ),
             const SizedBox(height: 20),
+            if (q.imageUrl != null)
+              Expanded(
+                flex: 2,
+                child: Image.network(q.imageUrl!, fit: BoxFit.contain),
+              ),
+            if (q.imageUrl != null) const SizedBox(height: 20),
             Expanded(
               flex: 2,
               child: AspectRatio(

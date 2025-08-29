@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quizzique/logic/logic.dart';
+import 'package:quizzique/widgets/image_viewer.dart';
 import 'package:quizzique/widgets/question_types_edit/four_options.dart';
 import 'package:quizzique/widgets/question_types_edit/guess.dart';
 import 'package:quizzique/widgets/question_types_edit/two_options.dart';
@@ -53,7 +54,7 @@ class _QuizEditState extends State<QuizEdit> {
       durationController.text = currentQuestion.duration.toString();
     }
     final MediaQueryData mq = MediaQuery.of(context);
-    final double buttonHeight = (mq.size.height * 0.2);
+    final double buttonHeight = (mq.size.height * 0.15);
     final ScrollController scrollController = ScrollController();
 
     return Row(
@@ -147,127 +148,156 @@ class _QuizEditState extends State<QuizEdit> {
         ),
         const SizedBox(width: 16),
         Expanded(
-          flex: 8,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color:
-                      View.of(context).platformDispatcher.platformBrightness ==
-                          Brightness.light
-                      ? Color.fromARGB(255, 255, 236, 207)
-                      : Color.fromARGB(255, 145, 115, 69),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(16),
-                    topRight: Radius.circular(8),
-                    topLeft: Radius.circular(16),
-                  ),
-                ),
-                child: Focus(
-                  onFocusChange: (hasFocus) {
-                    if (!hasFocus) {
-                      setState(() {
-                        currentQuestion.question = questionController.text;
-                      });
-                    }
-                  },
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Question',
-                      border: InputBorder.none,
+          flex: 7,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color:
+                        View.of(
+                              context,
+                            ).platformDispatcher.platformBrightness ==
+                            Brightness.light
+                        ? Color.fromARGB(255, 255, 236, 207)
+                        : Color.fromARGB(255, 145, 115, 69),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(8),
+                      bottomRight: Radius.circular(16),
+                      topRight: Radius.circular(8),
+                      topLeft: Radius.circular(16),
                     ),
-                    minLines: 1,
-                    maxLines: 3,
-                    maxLength: 200,
-                    autocorrect: true,
-                    textCapitalization: TextCapitalization.sentences,
-                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                    controller: questionController,
                   ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Focus(
-                onFocusChange: (hasFocus) {
-                  if (!hasFocus) {
-                    setState(() {
-                      currentQuestion.duration =
-                          int.tryParse(durationController.text) ?? 0;
-                    });
-                  }
-                },
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Duration (seconds)',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                  child: Focus(
+                    onFocusChange: (hasFocus) {
+                      if (!hasFocus) {
+                        setState(() {
+                          currentQuestion.question = questionController.text;
+                        });
+                      }
+                    },
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Question',
+                        border: InputBorder.none,
+                      ),
+                      minLines: 1,
+                      maxLines: 3,
+                      maxLength: 200,
+                      autocorrect: true,
+                      textCapitalization: TextCapitalization.sentences,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      style: Theme.of(context).textTheme.titleLarge,
+                      textAlign: TextAlign.center,
+                      controller: questionController,
                     ),
-                    counterText: '',
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  maxLength: 3,
-                  controller: durationController,
-                  onTap: () {
-                    // Move cursor to the end when tapped
-                    durationController.selection = TextSelection.fromPosition(
-                      TextPosition(offset: durationController.text.length),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
-                    width: 1,
                   ),
                 ),
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 1.0),
-                child: DropdownButton(
-                  menuWidth: mq.size.width * 0.7,
-                  items: [
-                    DropdownMenuItem(
-                      value: QuestionType.fourChoices,
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 2.0),
-                        child: Text('Four Choices'),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Focus(
+                        onFocusChange: (hasFocus) {
+                          if (!hasFocus) {
+                            setState(() {
+                              currentQuestion.duration =
+                                  int.tryParse(durationController.text) ?? 0;
+                            });
+                          }
+                        },
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            labelText: 'Duration (seconds)',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            counterText: '',
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          maxLength: 3,
+                          controller: durationController,
+                          onTap: () {
+                            // Move cursor to the end when tapped
+                            durationController.selection =
+                                TextSelection.fromPosition(
+                                  TextPosition(
+                                    offset: durationController.text.length,
+                                  ),
+                                );
+                          },
+                        ),
                       ),
                     ),
-                    DropdownMenuItem(
-                      value: QuestionType.twoChoices,
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 2.0),
-                        child: Text('Two Choices'),
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: QuestionType.guess,
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 2.0),
-                        child: Text('Guess'),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.0),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline,
+                            width: 1,
+                          ),
+                        ),
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 1.0,
+                        ),
+                        child: DropdownButton(
+                          menuWidth: mq.size.width * 0.7,
+                          items: [
+                            DropdownMenuItem(
+                              value: QuestionType.fourChoices,
+                              child: Padding(
+                                padding: EdgeInsets.only(left: 2.0),
+                                child: Text('Four Choices'),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: QuestionType.twoChoices,
+                              child: Padding(
+                                padding: EdgeInsets.only(left: 2.0),
+                                child: Text('Two Choices'),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: QuestionType.guess,
+                              child: Padding(
+                                padding: EdgeInsets.only(left: 2.0),
+                                child: Text('Guess'),
+                              ),
+                            ),
+                          ],
+                          onChanged: (element) {
+                            currentQuestion.type = element!;
+                          },
+                          value: currentQuestion.type,
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
                       ),
                     ),
                   ],
-                  onChanged: (element) {
-                    currentQuestion.type = element!;
-                  },
-                  value: currentQuestion.type,
-                  borderRadius: BorderRadius.circular(10.0),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                flex: 3,
-                child: switch (currentQuestion.type) {
+                const SizedBox(height: 8),
+                Container(
+                  height: mq.size.height * 0.3,
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: ImageViewer(
+                    client: widget.client,
+                    question: currentQuestion,
+                    setUrl: (url) => setState(() {
+                      currentQuestion.imageUrl = url;
+                    }),
+                  ),
+                ),
+                switch (currentQuestion.type) {
                   QuestionType.fourChoices => FourOptions(
                     buttonHeight: buttonHeight,
                     currentQuestion: currentQuestion,
@@ -284,8 +314,8 @@ class _QuizEditState extends State<QuizEdit> {
                     editMode: true,
                   ),
                 },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

@@ -67,6 +67,7 @@ Future<Question> getCurrentQuestion({
           duration: payload['d'] as int,
           durationBeforeAnswer: row.data['quiz']['durationBeforeAnswer'] as int,
           type: QuestionType.values[payload['t'] as int],
+          imageUrl: payload['imageUrl'] as String?,
         );
       })
       .catchError((error) {
@@ -110,6 +111,7 @@ Future<void> goToNextQuestion({
         ],
         'd': nextQuestion['d'],
         't': nextQuestion['t'],
+        'imageUrl': nextQuestion['imageUrl'],
       }),
     },
   );
@@ -125,6 +127,7 @@ class Question {
   int duration;
   int durationBeforeAnswer;
   QuestionType type;
+  String? imageUrl;
 
   Question({
     required this.gameID,
@@ -136,6 +139,7 @@ class Question {
     required this.questionIndex,
     required this.durationBeforeAnswer,
     required this.type,
+    this.imageUrl,
   });
   Question.empty()
     : gameID = '',
@@ -157,7 +161,8 @@ class Question {
         question == otherQuestion.question &&
         listEquals(answers, otherQuestion.answers) &&
         correctAnswerIndex == otherQuestion.correctAnswerIndex &&
-        type == otherQuestion.type;
+        type == otherQuestion.type &&
+        imageUrl == otherQuestion.imageUrl;
   }
 
   @override
@@ -166,7 +171,8 @@ class Question {
         question.hashCode ^
         answers.hashCode ^
         (correctAnswerIndex?.hashCode ?? 0) ^
-        type.hashCode;
+        type.hashCode ^
+        (imageUrl?.hashCode ?? 0);
   }
 
   Future<AnswerResponse> answer({
@@ -251,6 +257,7 @@ class Question {
       durationBeforeAnswer: durationBeforeAnswer,
       duration: duration,
       type: type,
+      imageUrl: imageUrl,
     );
   }
 }
@@ -741,6 +748,20 @@ Future<List<Quiz>> browseQuiz({
   return rows.rows.map((row) => Quiz.fromJson(row.data)).toList();
 }
 
+Future<File> uploadFile({required Client client, required String path}) async {
+  Storage storage = Storage(client);
+  File file = await storage.createFile(
+    bucketId: Constants.bucketId,
+    fileId: ID.unique(),
+    file: InputFile.fromPath(path: path),
+  );
+  return file;
+}
+
+String fileToPath({required File file}) {
+  return '${Constants.appwriteUrl}/storage/buckets/${Constants.bucketId}/files/${file.$id}/view?project=${Constants.appwriteProjectId}';
+}
+
 class GameCreationResponse {
   final String gameID;
   final int code;
@@ -797,6 +818,7 @@ class Quiz {
               duration: q['d'] as int,
               durationBeforeAnswer: json['durationBeforeAnswer'] as int,
               type: QuestionType.values[q['t'] as int? ?? 0],
+              imageUrl: q['imageUrl'] as String?,
             ),
           )
           .toList();
@@ -823,6 +845,7 @@ class Quiz {
           'c': q.correctAnswerIndex,
           'd': q.duration,
           't': q.type.index,
+          'imageUrl': q.imageUrl,
         });
       }).toList(),
     };

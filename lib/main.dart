@@ -54,6 +54,7 @@ void main() async {
       gamesTableId: dotenv.get('GAMES_TABLE_ID'),
       answerCheckFunctionId: dotenv.get('ANSWER_CHECK_FUNCTION_ID'),
       scoresTableId: dotenv.get('SCORES_TABLE_ID'),
+      bucketId: dotenv.get('BUCKET_ID'),
       url: dotenv.get('URL'),
       port: dotenv.get('PORT', fallback: ''),
       isDemo: dotenv.getBool('DEMO', fallback: false),
