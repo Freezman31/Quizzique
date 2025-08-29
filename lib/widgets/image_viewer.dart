@@ -53,7 +53,16 @@ class _ImageViewerState extends State<ImageViewer> {
       );
     } else {
       return Center(
-        child: Image.network(widget.question.imageUrl!, fit: BoxFit.contain),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => _onImageTap(),
+            child: Image.network(
+              widget.question.imageUrl!,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
       );
     }
   }
