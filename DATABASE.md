@@ -8,9 +8,13 @@
 - **questions**: String[]
 - **owner**: relationship with User
 - **durationBeforeAnswer**: int
+- **isPublic**: bool
+- **description**: String
 #### Permissions
 - Any: can read
 - Users: can create, update their own quizzes
+#### Indexes
+You need to add a fulltext index to the **name** field, for the browsing of quizzes to work.
 
 
 ### Games

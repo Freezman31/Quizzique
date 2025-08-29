@@ -21,7 +21,10 @@
 3. **Configure Database:** Set up the collections your app needs in Appwrite's database according to the [database scheme](DATABASE.md).
 4. **Update environment variables:** Add your Appwrite details to the `dotenv` file (using the dotenv.example template).
 5. **Prepare to build:** Install [Flutter](https://flutter.dev/) if you haven't already, then run `flutter pub get` to install dependencies.
-6. **Build the app:** Run `flutter build web --release` to compile the app for the web. The output will be in the `build/web` directory and can be served using any static file server. Note that if you're using a subdirectory in your web server, you may need to adjust the base href in the `index.html` file by providing the `--base-href` option.
+6. **Build the app:** Run `flutter build web --release` to compile the app for the web. The output will be in the `build/web` directory and can be served using any static file server. Note that if you're using a subdirectory in your web server, you may need to adjust the base href in the `index.html` file by providing the `--base-href` option. To be able to use URLs correctly, make sure to set the index.html also as the 404 page.
+
+## Why Quizzique?
+Alternatives like Kahoot! or Blooket all suffer from the same limitation that made me create Quizzique: a limit of a certain number of players per game unless you pay some expensive subscription that you're only gonna use once or twice. Quizzique aims to provide a completely free and open-source alternative that allows unlimited players, making it accessible for everyone. You can either use the "hosted" version, or self-host it yourself using the provided guide.
 
 #### AI was solely used for code completion.
 #### This project was created during the Summer of Code 2025 by HackClub.
