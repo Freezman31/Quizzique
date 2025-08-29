@@ -88,6 +88,12 @@ class _WaitingPageState extends State<WaitingPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          if (players.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No players joined yet')),
+            );
+            return;
+          }
           await goToNextQuestion(
             client: widget.client,
             gameID: gameID,
