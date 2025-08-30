@@ -77,9 +77,9 @@ Future main(final dynamic context) async {
       isCorrect = userAnswer == correctAnswer;
       score = (1000 * (1 - (timeTaken / 2) / timeAllowed.inSeconds)).ceil();
     }
-    if (timeTaken > timeAllowed.inSeconds) {
+    if (timeTaken > timeAllowed.inSeconds || questionPayload['ended'] == true) {
       context.log(
-          'Time taken exceeds allowed time: $timeTaken seconds, whereas allowed is ${timeAllowed.inSeconds} seconds');
+          'Time taken exceeds allowed time: $timeTaken seconds, whereas allowed is ${timeAllowed.inSeconds} seconds, or question was ended early');
       tablesDB.deleteRow(
           databaseId: databaseId, tableId: answerId, rowId: answerId);
       context.log('Answer deleted due to time limit exceeded');

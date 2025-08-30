@@ -97,6 +97,7 @@ class _PresentPageState extends State<PresentPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          await endQuestion(client: widget.client, gameID: gameID);
           if (questionIndex == quiz.questions.length - 1) {
             await endGame(client: widget.client, gameID: gameID);
             Navigator.pushNamed(

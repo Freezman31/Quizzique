@@ -761,6 +761,25 @@ String fileToPath({required File file}) {
   return '${Constants.appwriteUrl}/storage/buckets/${Constants.bucketId}/files/${file.$id}/view?project=${Constants.appwriteProjectId}';
 }
 
+Future endQuestion({required Client client, required String gameID}) async {
+  TablesDB tablesDB = TablesDB(client);
+  final data = await tablesDB.getRow(
+    databaseId: Constants.databaseId,
+    tableId: Constants.gamesTableId,
+    rowId: gameID,
+  );
+  await tablesDB.updateRow(
+    databaseId: Constants.databaseId,
+    tableId: Constants.gamesTableId,
+    rowId: gameID,
+    data: {
+      'currentQuestion': jsonEncode(
+        jsonDecode(data.data['currentQuestion'])..['ended'] = true,
+      ),
+    },
+  );
+}
+
 class GameCreationResponse {
   final String gameID;
   final int code;

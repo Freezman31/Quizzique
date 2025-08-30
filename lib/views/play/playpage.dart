@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +28,8 @@ class _PlayPageState extends State<PlayPage> {
   late int value = q.type == QuestionType.guess
       ? (int.parse(q.answers[0]) + int.parse(q.answers[1]) ~/ 2)
       : 0;
+
+  late AnswerResponse rep;
 
   @override
   void dispose() {
@@ -79,6 +80,21 @@ class _PlayPageState extends State<PlayPage> {
               event.payload['ended'] == true) {
             Logger().i('Game ended, navigating to results page.');
             result(context: context, client: widget.client, gameID: v.gameID);
+          } else if (event.events.contains(
+                'databases.${Constants.databaseId}.tables.${Constants.gamesTableId}.rows.${v.gameID}',
+              ) &&
+              jsonDecode(event.payload['currentQuestion'])['id'] ==
+                  q.questionID &&
+              (jsonDecode(event.payload['currentQuestion'])['ended'] ??
+                      false) ==
+                  true) {
+            Logger().i('Current question ended, navigating to results page.');
+            answerResult(
+              context: context,
+              response: rep,
+              q: q,
+              lastUpdate: lastUpdate,
+            );
           }
         });
         setState(() {
@@ -110,22 +126,22 @@ class _PlayPageState extends State<PlayPage> {
                 q: q,
                 client: widget.client,
                 username: username,
-                lastUpdate: lastUpdate,
+                callback: setResponse,
               ),
               QuestionType.twoChoices => twoOptions(
                 context: context,
                 q: q,
                 client: widget.client,
                 username: username,
-                lastUpdate: lastUpdate,
+                callback: setResponse,
               ),
               QuestionType.guess => guess(
                 context: context,
                 q: q,
                 client: widget.client,
                 username: username,
-                lastUpdate: lastUpdate,
                 value: value,
+                callback: setResponse,
                 valueUpdate: (newValue) {
                   setState(() {
                     value = newValue;
@@ -137,6 +153,10 @@ class _PlayPageState extends State<PlayPage> {
         ),
       ),
     );
+  }
+
+  void setResponse(AnswerResponse response) {
+    rep = response;
   }
 
   void wait(bool waitingStart, int durationInSeconds) {
@@ -225,77 +245,66 @@ void answerResult({
   required Question q,
   required DateTime? lastUpdate,
 }) {
-  Future.delayed(
-    Duration(
-      milliseconds: max(
-        q.duration * 1000 -
-            (DateTime.now().difference(lastUpdate!).inMilliseconds),
-        0,
-      ),
-    ),
-    () {
-      if (!ModalRoute.of(context)!.isCurrent) {
-        Navigator.pop(context);
-      }
-      showDialog(
-        context: context,
-        builder: (context) {
-          final MediaQueryData mq = MediaQuery.of(context);
-          return AlertDialog(
-            title: Text(
-              response.status == AnswerStatus.correct
-                  ? 'You Win!'
-                  : response.status == AnswerStatus.incorrect
-                  ? 'You Lose!'
-                  : response.status == AnswerStatus.tooLate
-                  ? 'Too Late!'
-                  : 'Already Answered',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            content: SizedBox(
-              width: mq.size.width * 0.8,
-              height: mq.size.height * 0.4,
-              child: Column(
-                children: [
-                  Text(
-                    response.status == AnswerStatus.correct
-                        ? 'Congratulations! You answered correctly. You won ${response.score} points!'
-                        : response.status == AnswerStatus.incorrect
-                        ? 'Sorry, that was incorrect.'
-                        : response.status == AnswerStatus.tooLate
-                        ? 'Sorry, you took too long to answer.'
-                        : 'You have already answered this question.',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  Expanded(
-                    child: Icon(
-                      response.status == AnswerStatus.correct
-                          ? Icons.check_circle
-                          : response.status == AnswerStatus.incorrect
-                          ? Icons.cancel
-                          : response.status == AnswerStatus.tooLate
-                          ? Icons.hourglass_empty
-                          : Icons.warning,
-                      color: response.status == AnswerStatus.correct
-                          ? Colors.green
-                          : response.status == AnswerStatus.incorrect
-                          ? Colors.red
-                          : response.status == AnswerStatus.tooLate
-                          ? Colors.orange
-                          : Colors.grey,
-                      size: mq.size.height * 0.2,
-                    ),
-                  ),
-                ],
+  if (!ModalRoute.of(context)!.isCurrent) {
+    Navigator.pop(context);
+  }
+  showDialog(
+    context: context,
+    builder: (context) {
+      final MediaQueryData mq = MediaQuery.of(context);
+      return AlertDialog(
+        title: Text(
+          response.status == AnswerStatus.correct
+              ? 'You Win!'
+              : response.status == AnswerStatus.incorrect
+              ? 'You Lose!'
+              : response.status == AnswerStatus.tooLate
+              ? 'Too Late!'
+              : 'Already Answered',
+          style: Theme.of(
+            context,
+          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: SizedBox(
+          width: mq.size.width * 0.8,
+          height: mq.size.height * 0.4,
+          child: Column(
+            children: [
+              Text(
+                response.status == AnswerStatus.correct
+                    ? 'Congratulations! You answered correctly. You won ${response.score} points!'
+                    : response.status == AnswerStatus.incorrect
+                    ? 'Sorry, that was incorrect.'
+                    : response.status == AnswerStatus.tooLate
+                    ? 'Sorry, you took too long to answer.'
+                    : 'You have already answered this question.',
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-            ),
-          );
-        },
-        barrierDismissible: false,
+              Expanded(
+                child: Icon(
+                  response.status == AnswerStatus.correct
+                      ? Icons.check_circle
+                      : response.status == AnswerStatus.incorrect
+                      ? Icons.cancel
+                      : response.status == AnswerStatus.tooLate
+                      ? Icons.hourglass_empty
+                      : Icons.warning,
+                  color: response.status == AnswerStatus.correct
+                      ? Colors.green
+                      : response.status == AnswerStatus.incorrect
+                      ? Colors.red
+                      : response.status == AnswerStatus.tooLate
+                      ? Colors.orange
+                      : Colors.grey,
+                  size: mq.size.height * 0.2,
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     },
+    barrierDismissible: false,
   );
 }
 
@@ -308,10 +317,12 @@ void result({
   showDialog(
     context: context,
     builder: (context) {
+      final MediaQueryData mq = MediaQuery.of(context);
       return AlertDialog(
         title: Text('Podium'),
         content: SizedBox(
-          width: double.maxFinite,
+          height: mq.size.height * 0.3,
+          width: mq.size.width * 0.5,
           child: Column(
             children: [
               RichText(
@@ -359,7 +370,7 @@ List<Widget> fourOptions({
   required Question q,
   required Client client,
   required String username,
-  required DateTime? lastUpdate,
+  required Function(AnswerResponse) callback,
 }) {
   return [
     Expanded(
@@ -370,11 +381,8 @@ List<Widget> fourOptions({
             child: QuizButton(
               onPressed: () async {
                 loading(context: context);
-                answerResult(
-                  lastUpdate: lastUpdate,
-                  q: q,
-                  context: context,
-                  response: await q.answer(
+                callback(
+                  await q.answer(
                     client: client,
                     answerIndex: 0,
                     playerName: username,
@@ -390,11 +398,8 @@ List<Widget> fourOptions({
             child: QuizButton(
               onPressed: () async {
                 loading(context: context);
-                answerResult(
-                  lastUpdate: lastUpdate,
-                  q: q,
-                  context: context,
-                  response: await q.answer(
+                callback(
+                  await q.answer(
                     client: client,
                     answerIndex: 1,
                     playerName: username,
@@ -417,11 +422,8 @@ List<Widget> fourOptions({
             child: QuizButton(
               onPressed: () async {
                 loading(context: context);
-                answerResult(
-                  lastUpdate: lastUpdate,
-                  q: q,
-                  context: context,
-                  response: await q.answer(
+                callback(
+                  await q.answer(
                     client: client,
                     answerIndex: 2,
                     playerName: username,
@@ -437,11 +439,8 @@ List<Widget> fourOptions({
             child: QuizButton(
               onPressed: () async {
                 loading(context: context);
-                answerResult(
-                  context: context,
-                  lastUpdate: lastUpdate,
-                  q: q,
-                  response: await q.answer(
+                callback(
+                  await q.answer(
                     client: client,
                     answerIndex: 3,
                     playerName: username,
@@ -463,7 +462,7 @@ List<Widget> twoOptions({
   required Question q,
   required Client client,
   required String username,
-  required DateTime? lastUpdate,
+  required Function(AnswerResponse) callback,
 }) {
   return [
     Expanded(
@@ -474,11 +473,8 @@ List<Widget> twoOptions({
             child: QuizButton(
               onPressed: () async {
                 loading(context: context);
-                answerResult(
-                  lastUpdate: lastUpdate,
-                  q: q,
-                  context: context,
-                  response: await q.answer(
+                callback(
+                  await q.answer(
                     client: client,
                     answerIndex: 0,
                     playerName: username,
@@ -494,13 +490,10 @@ List<Widget> twoOptions({
             child: QuizButton(
               onPressed: () async {
                 loading(context: context);
-                answerResult(
-                  lastUpdate: lastUpdate,
-                  q: q,
-                  context: context,
-                  response: await q.answer(
+                callback(
+                  await q.answer(
                     client: client,
-                    answerIndex: 1,
+                    answerIndex: 0,
                     playerName: username,
                   ),
                 );
@@ -520,9 +513,9 @@ List<Widget> guess({
   required Question q,
   required Client client,
   required String username,
-  required DateTime? lastUpdate,
   required Function(int) valueUpdate,
   required int value,
+  required Function(AnswerResponse) callback,
 }) {
   final theme = Theme.of(context);
   final TextEditingController valueController = TextEditingController(
@@ -606,11 +599,8 @@ List<Widget> guess({
       child: ElevatedButton(
         onPressed: () async {
           loading(context: context);
-          answerResult(
-            lastUpdate: lastUpdate,
-            q: q,
-            context: context,
-            response: await q.answer(
+          callback(
+            await q.answer(
               client: client,
               answerIndex: value,
               playerName: username,
