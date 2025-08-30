@@ -23,9 +23,9 @@ extension StringNumberExtension on String {
 }
 
 extension StringMaxLength on String {
-  String max(int length) {
-    if (this.length <= length) return this;
-    return '${substring(0, length - 3)}...';
+  String max(int newLength) {
+    if (length <= newLength) return this;
+    return '${substring(0, newLength - 3)}...';
   }
 }
 

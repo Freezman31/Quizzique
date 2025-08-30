@@ -396,7 +396,7 @@ Future<User> createAccount({
     final User user = await account.get();
     await account.updateEmail(email: email, password: password);
     await account.updateName(name: username);
-    // Create a table in the users collection
+    // Create a row in the users table
     await tablesDB.createRow(
       databaseId: Constants.databaseId,
       tableId: Constants.usersTableId,
@@ -553,7 +553,6 @@ Future<List<Quiz>> getQuizzesFromUser({required Client client}) async {
       ],
     );
     final Map<String, dynamic> payload = userData.data;
-    Logger().i('User data fetched: $payload');
 
     return (payload['quizzes'] as List<dynamic>)
         .map((quiz) => Quiz.fromJson(quiz))

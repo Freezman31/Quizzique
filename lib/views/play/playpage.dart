@@ -60,9 +60,6 @@ class _PlayPageState extends State<PlayPage> {
                   q.questionID &&
               jsonDecode(event.payload['currentQuestion'])['i'] !=
                   q.questionIndex) {
-            Logger().i(
-              'New question received: ${jsonDecode(event.payload['currentQuestion'])['id']},',
-            );
             Logger().i('Current question ID: ${q.questionID}');
             if (!ModalRoute.of(context)!.isCurrent) {
               Navigator.pop(context);

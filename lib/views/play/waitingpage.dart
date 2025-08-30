@@ -101,6 +101,7 @@ class _WaitingPageState extends State<WaitingPage> {
           );
           await audioPlayer.stop();
           await audioPlayer.dispose();
+          sub?.close();
           Navigator.pushNamed(
             context,
             PresentPage.route,
